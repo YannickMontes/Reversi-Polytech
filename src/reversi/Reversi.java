@@ -5,6 +5,8 @@
  */
 package reversi;
 
+import reversi_modele.Grille;
+
 /**
  *
  * @author yannick
@@ -17,7 +19,8 @@ public class Reversi
      */
     public static void main(String[] args)
     {
-        // TODO code application logic here
+        Grille g = new Grille();
+        System.out.println(g);
     }
     
 }
