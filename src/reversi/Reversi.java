@@ -6,6 +6,7 @@
 package reversi;
 
 import reversi_modele.Grille;
+import reversi_vue.MainWindow;
 
 /**
  *
@@ -18,9 +19,11 @@ public class Reversi
      * @param args the command line arguments
      */
     public static void main(String[] args)
-    {
+    {        
         Grille g = new Grille();
+        g.getCase(0, 0).initImages();
         System.out.println(g);
+        MainWindow mw = new MainWindow("Reversi", g);
     }
     
 }

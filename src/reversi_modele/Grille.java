@@ -11,8 +11,8 @@ package reversi_modele;
  */
 public class Grille
 {
-    public final int HEIGHT_GRID = 8;
-    public final int WIDTH_GRID = 8;
+    public static final int HEIGHT_GRID = 8;
+    public static final int WIDTH_GRID = 8;
     
     private Case[][] grille;
     
