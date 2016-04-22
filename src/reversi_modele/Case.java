@@ -19,15 +19,15 @@ public class Case
 {
     private static BufferedImage pionNoir;
     private static BufferedImage pionBlanc;
-    private int val;
+    private CaseContent val;
     
     
     public Case()
     {
-        val = -1;
+        val = CaseContent.VIDE;
     }
     
-    public Case(int val)
+    public Case(CaseContent val)
     {
         this.val = val;
     }
@@ -45,23 +45,23 @@ public class Case
         }
     }
     
-    public int getVal()
+    public CaseContent getVal()
     {
         return this.val;
     }
     
-    public void setVal(int val)
+    public void setVal(CaseContent val)
     {
         this.val = val;
     }
     
     public BufferedImage getImage()
     {
-        if(this.val == 0)
+        if(this.val == CaseContent.BLANC)
         {
             return pionBlanc;
         }
-        else if(this.val == 1)
+        else if(this.val == CaseContent.NOIR)
         {
             return pionNoir;
         }
@@ -71,6 +71,6 @@ public class Case
     @Override
     public String toString()
     {
-        return Integer.toString(this.val);
+        return " "+this.val.toString()+" ";
     }
 }
