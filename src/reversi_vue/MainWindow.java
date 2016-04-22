@@ -5,9 +5,9 @@
  */
 package reversi_vue;
 
-import java.awt.Dimension;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import reversi_modele.CaseContent;
 import reversi_modele.Grille;
 
 /**
@@ -19,12 +19,15 @@ public class MainWindow extends JFrame
     private Grille plateau;
     private JPanel principalPane;
     private VueGrille gridComponent;
+    private CaseContent nextTurn;
     
     public MainWindow(String name, Grille g)
     {
         super(name);
         this.plateau = g;
+        this.nextTurn = CaseContent.NOIR;
         this.init();
+        System.out.println(this.plateau);
     }
     
     private void init()

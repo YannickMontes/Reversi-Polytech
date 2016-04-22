@@ -11,6 +11,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import javax.swing.JComponent;
+import reversi_modele.CaseContent;
 import reversi_modele.Grille;
 
 /**
@@ -48,7 +49,7 @@ public class VueGrille extends JComponent
         {
             for(int j=0; j<Grille.WIDTH_GRID; j++)
             {
-                if(this.grille.getCase(i, j).getVal()!=-1)
+                if(this.grille.getCase(i, j).getVal()!=CaseContent.VIDE)
                 {
                     g2.drawImage(this.grille.getCase(i, j).getImage(), j*100, i*100, this);
                 }
