@@ -22,7 +22,6 @@ public class Reversi
     {        
         Grille g = new Grille();
         g.getCase(0, 0).initImages();
-        System.out.println(g);
         MainWindow mw = new MainWindow("Reversi", g);
     }
     
