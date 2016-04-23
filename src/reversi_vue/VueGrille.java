@@ -129,7 +129,6 @@ public class VueGrille extends JComponent implements MouseMotionListener, MouseL
             {
                 nextTurn = CaseContent.BLANC;
             }
-            System.out.println(this.grille);
             this.repaint();
         }
     }
