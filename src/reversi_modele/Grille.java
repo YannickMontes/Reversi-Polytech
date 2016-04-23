@@ -72,32 +72,32 @@ public class Grille
         //If the selected case isn't in the grid
         if(ligne < 0 || ligne > 7 || colonne < 0 || colonne > 7)
         {
-            try {
-                throw new Exception("Case sélectionné en dehors des limites de la grille.");
-            } catch (Exception ex) {
-                Logger.getLogger(Grille.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            return;
         }
         
         //If the selected case is already occuped by a piece
         if(this.grille[ligne][colonne].getVal()!=CaseContent.VIDE)
         {
-            try {
-                throw new Exception("Case déjà occupé.");
-            } catch (Exception ex) {
-                Logger.getLogger(Grille.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            return;
         }
         
         this.grille[ligne][colonne].setVal(color);
-        this.play(ligne-1, colonne-1, 0, color, true);
-        this.play(ligne-1, colonne, 1, color, true);
-        this.play(ligne-1, colonne+1, 2, color, true);
-        this.play(ligne, colonne+1, 3, color, true);
-        this.play(ligne+1, colonne+1, 4, color, true);
-        this.play(ligne+1, colonne, 5, color, true);
-        this.play(ligne+1, colonne-1, 6, color, true);
-        this.play(ligne, colonne-1, 7, color, true);
+        boolean[] directions = this.getPlayableDirection(ligne, colonne, color);
+        for(int i=0; i<directions.length; i++)
+        {
+            if(directions[i])
+            {
+                this.play(ligne, colonne, i, color, true, ligne, colonne);
+            }
+        }
+//        this.play(ligne-1, colonne-1, 0, color, true);
+//        this.play(ligne-1, colonne, 1, color, true);
+//        this.play(ligne-1, colonne+1, 2, color, true);
+//        this.play(ligne, colonne+1, 3, color, true);
+//        this.play(ligne+1, colonne+1, 4, color, true);
+//        this.play(ligne+1, colonne, 5, color, true);
+//        this.play(ligne+1, colonne-1, 6, color, true);
+//        this.play(ligne, colonne-1, 7, color, true);
     }
     
     /**
@@ -138,9 +138,11 @@ public class Grille
      * @param direction La direction qu'on veut vérifier
      * @param color La couleur du joueur en question
      * @param jeu Un booléen qui décide si l'on doit jouer le coup ou juste vérifier
+     * @param ligneDeb Ligne de départ
+     * @param colonneDeb Colonne de départ
      * @return True si le coup est jouable, faux sinon.
      */
-    private boolean play(int ligne, int colonne, int direction, CaseContent color, boolean jeu)
+    private boolean play(int ligne, int colonne, int direction, CaseContent color, boolean jeu, int ligneDeb, int colonneDeb)
     {
         //On vérifie que la case ne soit pas hors limite.
         if(ligne < 0 || ligne > HEIGHT_GRID-1 || colonne < 0 || colonne > WIDTH_GRID -1)
@@ -150,7 +152,7 @@ public class Grille
         //Si la case est de la couleur de la couleur du joueur
         //On vérifie que la suivante dans la direction soit vide pour pouvoir jouer. 
         //Le cas échéant, cette direction n'est pas jouable.
-        if(this.grille[ligne][colonne].getVal() == color)
+        if(this.grille[ligne][colonne].getVal() == color && this.grille[ligne][colonne]!=this.grille[ligneDeb][colonneDeb])
         {
             switch(direction)
             {
@@ -212,7 +214,7 @@ public class Grille
             case 0:
                 if(ligne > 0 && colonne > 0)
                 {
-                    if(this.play(ligne-1, colonne-1, direction, color, jeu))
+                    if(this.play(ligne-1, colonne-1, direction, color, jeu, ligneDeb, colonneDeb))
                     {
                         if(jeu)
                         {
@@ -232,7 +234,7 @@ public class Grille
             case 1:
                 if(ligne > 0)
                 {
-                    if(this.play(ligne-1, colonne, direction, color, jeu))
+                    if(this.play(ligne-1, colonne, direction, color, jeu, ligneDeb, colonneDeb))
                     {
                         if(jeu)
                         {
@@ -252,7 +254,7 @@ public class Grille
             case 2:
                 if(ligne > 0 && colonne < WIDTH_GRID-1)
                 {
-                    if(this.play(ligne-1, colonne+1, direction, color, jeu))
+                    if(this.play(ligne-1, colonne+1, direction, color, jeu, ligneDeb, colonneDeb))
                     {
                         if(jeu)
                         {
@@ -272,7 +274,7 @@ public class Grille
             case 3:
                 if(colonne < 7)
                 {
-                    if(this.play(ligne, colonne+1, direction, color, jeu))
+                    if(this.play(ligne, colonne+1, direction, color, jeu, ligneDeb, colonneDeb))
                     {
                         if(jeu)
                         {
@@ -288,7 +290,7 @@ public class Grille
             case 4:
                 if(ligne < HEIGHT_GRID-1 && colonne < WIDTH_GRID-1)
                 {
-                    if(this.play(ligne+1, colonne+1, direction, color, jeu))
+                    if(this.play(ligne+1, colonne+1, direction, color, jeu, ligneDeb, colonneDeb))
                     {
                         if(jeu)
                         {
@@ -308,7 +310,7 @@ public class Grille
             case 5:
                 if(ligne < HEIGHT_GRID-1)
                 {
-                    if(this.play(ligne+1, colonne, direction, color, jeu))
+                    if(this.play(ligne+1, colonne, direction, color, jeu, ligneDeb, colonneDeb))
                     {
                         if(jeu)
                         {
@@ -328,7 +330,7 @@ public class Grille
             case 6:
                 if(ligne < HEIGHT_GRID-1 && colonne > 0 )
                 {
-                    if(this.play(ligne+1, colonne-1, direction, color, jeu))
+                    if(this.play(ligne+1, colonne-1, direction, color, jeu, ligneDeb, colonneDeb))
                     {
                         if(jeu)
                         {
@@ -348,7 +350,7 @@ public class Grille
             case 7:
                 if(colonne > 0)
                 {
-                    if(this.play(ligne, colonne-1, direction, color, jeu))
+                    if(this.play(ligne, colonne-1, direction, color, jeu, ligneDeb, colonneDeb))
                     {
                         if(jeu)
                         {
@@ -452,6 +454,13 @@ public class Grille
             }
         }catch(Exception ex){}
         
+        for(int i=0; i<playable.length; i++)
+        {
+            if(playable[i])
+            {
+                playable[i] = this.play(ligne, colonne, i, color, false, ligne, colonne);
+            }
+        }
         return playable;
     }
     
@@ -465,14 +474,11 @@ public class Grille
      */
     public boolean isPlayable(int ligne, int colonne, CaseContent color)
     {
-        boolean[] directions = this.getPlayableDirection(ligne, colonne, color);
-        for(int i=0; i<directions.length; i++)
+        if(this.grille[ligne][colonne].getVal()!=CaseContent.VIDE)
         {
-            if(directions[i])
-            {
-                directions[i] = this.play(ligne, colonne, i, color, false);
-            }
+            return false;
         }
+        boolean[] directions = this.getPlayableDirection(ligne, colonne, color);
         for(int i=0; i<directions.length; i++)
         {
             if(directions[i])
