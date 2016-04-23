@@ -17,8 +17,10 @@ import javax.imageio.ImageIO;
  */
 public class Case
 {
-    private static BufferedImage pionNoir;
-    private static BufferedImage pionBlanc;
+    public static BufferedImage pionNoir;
+    public static BufferedImage pionBlanc;
+    public static BufferedImage pionNoirFocus;
+    public static BufferedImage pionBlancFocus;
     private CaseContent val;
     
     
@@ -38,6 +40,8 @@ public class Case
         {
             Case.pionBlanc = ImageIO.read(getClass().getResource("/reversi_images/0.png"));
             Case.pionNoir = ImageIO.read(getClass().getResource("/reversi_images/1.png"));
+            Case.pionBlancFocus = ImageIO.read(getClass().getResource("/reversi_images/focus_blanc.png"));
+            Case.pionNoirFocus = ImageIO.read(getClass().getResource("/reversi_images/focus_noir.png"));
             
         } catch (IOException ex)
         {
@@ -57,13 +61,15 @@ public class Case
     
     public BufferedImage getImage()
     {
-        if(this.val == CaseContent.BLANC)
+        if(null != this.val)
+        switch (this.val)
         {
-            return pionBlanc;
-        }
-        else if(this.val == CaseContent.NOIR)
-        {
-            return pionNoir;
+            case BLANC:
+                return pionBlanc;
+            case NOIR:
+                return pionNoir;
+            default:
+                break;
         }
         return null;
     }
