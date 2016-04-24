@@ -94,15 +94,22 @@ public class VueGrille extends JComponent implements MouseMotionListener, MouseL
     {
         int i = e.getY()/100;
         int j = e.getX()/100;
-        if(this.grille.isPlayable(e.getY()/100, e.getX()/100, nextTurn))
+        if(this.grille.getCase(i, j).getVal()==CaseContent.VIDE)
         {
-            focused = this.grille.getCase(i, j);
+            if(this.grille.isPlayable(e.getY()/100, e.getX()/100, nextTurn))
+            {
+                focused = this.grille.getCase(i, j);
+            }
+            else
+            {
+                focused = null;
+            }
+            this.repaint();
         }
         else
         {
             focused = null;
         }
-        this.repaint();
     }
 
     @Override

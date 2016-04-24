@@ -82,12 +82,12 @@ public class Grille
         }
         
         this.grille[ligne][colonne].setVal(color);
-        boolean[] directions = this.getPlayableDirection(ligne, colonne, color);
+        boolean[] directions = this.getPlayableDirection(ligne, colonne, color, true);
         for(int i=0; i<directions.length; i++)
         {
             if(directions[i])
             {
-                this.play(ligne, colonne, i, color, true, ligne, colonne);
+                this.play(ligne, colonne, i, color, true);
             }
         }
 //        this.play(ligne-1, colonne-1, 0, color, true);
@@ -138,237 +138,310 @@ public class Grille
      * @param direction La direction qu'on veut vérifier
      * @param color La couleur du joueur en question
      * @param jeu Un booléen qui décide si l'on doit jouer le coup ou juste vérifier
-     * @param ligneDeb Ligne de départ
-     * @param colonneDeb Colonne de départ
      * @return True si le coup est jouable, faux sinon.
      */
-    private boolean play(int ligne, int colonne, int direction, CaseContent color, boolean jeu, int ligneDeb, int colonneDeb)
+    private boolean play(int ligne, int colonne, int direction, CaseContent color, boolean jeu)
     {
-        //On vérifie que la case ne soit pas hors limite.
-        if(ligne < 0 || ligne > HEIGHT_GRID-1 || colonne < 0 || colonne > WIDTH_GRID -1)
-        {
-            return false;
-        }
-        //Si la case est de la couleur de la couleur du joueur
-        //On vérifie que la suivante dans la direction soit vide pour pouvoir jouer. 
-        //Le cas échéant, cette direction n'est pas jouable.
-        if(this.grille[ligne][colonne].getVal() == color && this.grille[ligne][colonne]!=this.grille[ligneDeb][colonneDeb])
-        {
-            switch(direction)
-            {
-                case 0:
-                    if(ligne > 0 && colonne > 0)
-                    {
-                        return this.grille[ligne-1][colonne-1].getVal()==CaseContent.VIDE;
-                    }
-                    break;
-                case 1:
-                    if(ligne > 0)
-                    {
-                        return this.grille[ligne-1][colonne].getVal()==CaseContent.VIDE;
-                    }
-                    break;
-                case 2:
-                    if(ligne > 0 && colonne < WIDTH_GRID-1)
-                    {
-                        return this.grille[ligne-1][colonne+1].getVal()==CaseContent.VIDE;
-                    }
-                    break;
-                case 3:
-                    if(colonne < WIDTH_GRID-1)
-                    {
-                        return this.grille[ligne][colonne+1].getVal()==CaseContent.VIDE;
-                    }
-                    break;
-                case 4:
-                    if(ligne < HEIGHT_GRID-1 && colonne < WIDTH_GRID-1)
-                    {
-                        return this.grille[ligne+1][colonne+1].getVal()==CaseContent.VIDE;
-                    }
-                    break;
-                case 5:
-                    if(ligne < HEIGHT_GRID-1)
-                    {
-                        return this.grille[ligne+1][colonne].getVal()==CaseContent.VIDE;
-                    }
-                    break;
-                case 6:
-                    if(ligne < HEIGHT_GRID-1 && colonne > 0)
-                    {
-                        return this.grille[ligne+1][colonne-1].getVal()==CaseContent.VIDE;
-                    }
-                    break;
-                case 7:
-                    if(colonne > 0)
-                    {
-                        return this.grille[ligne][colonne-1].getVal()==CaseContent.VIDE;
-                    }
-                    break;
-            }
-            return true;
-        }
-        //Sinon, si la case n'est pas de la même couleur que le joueur
-        //On rapelle la fonction avec la case suivante.
+        boolean playable = false;//Booléen correspondant a la jouabilité de la direction
+        int lastline=-1, lastcol=-1;//Variables de sauvegarde en cas de jeu
+        /*
+            Le principe est le même pour chaque direction. On se place de cases
+            à la suite dans la direction. En cas de limite en dehors du tableau, une 
+            exception est levée. 
+            On vérifie si la case est une case de la même couleur que le joueur:
+                -Si c'est le cas on sauvegarde la case actuelle, et on revient a la case sélectionné par le joueur. 
+                A partir de la, on met toutes les cases de la couleur du joueur, jusqu'a la case sauvegardé.
+                -Si la case est vide, alors la direction n'est pas jouable
+                -Si la case est de couleur adverse, on passe a la case suivante dans la même direction.
+        */
         switch(direction)
         {
-            case 0:
-                if(ligne > 0 && colonne > 0)
+            case 0://Haut gauche
+                try
                 {
-                    if(this.play(ligne-1, colonne-1, direction, color, jeu, ligneDeb, colonneDeb))
+                    int j = colonne - 2;
+                    for(int i=ligne-2; i>0; i--, j--)
                     {
-                        if(jeu)
+                        if(!playable)
                         {
-                            this.grille[ligne][colonne].setVal(color);
+                            if(this.grille[i][j].getVal()==color)
+                            {
+                                playable = true;
+                                lastline=i;
+                                lastcol=j;
+                                i=ligne;
+                                j=colonne;
+                            }
+                            else if(this.grille[i][j].getVal() == CaseContent.VIDE)
+                            {
+                                playable = false;
+                                i=0;
+                            }
                         }
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    return (this.grille[ligne][colonne].getVal() == color);
-                }
-            case 1:
-                if(ligne > 0)
-                {
-                    if(this.play(ligne-1, colonne, direction, color, jeu, ligneDeb, colonneDeb))
-                    {
-                        if(jeu)
+                        else if(jeu && playable && (i>lastline && j>lastcol))
                         {
-                            this.grille[ligne][colonne].setVal(color);
+                            this.grille[i][j].setVal(color);
                         }
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    return (this.grille[ligne][colonne].getVal() == color);
-                }
-            case 2:
-                if(ligne > 0 && colonne < WIDTH_GRID-1)
-                {
-                    if(this.play(ligne-1, colonne+1, direction, color, jeu, ligneDeb, colonneDeb))
-                    {
-                        if(jeu)
+                        else
                         {
-                            this.grille[ligne][colonne].setVal(color);
+                            i=0;
                         }
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
                     }
                 }
-                else
+                catch(Exception ex)
                 {
-                    return (this.grille[ligne][colonne].getVal() == color);
+                    System.out.println("Err Haut Gauche");
                 }
-            case 3:
-                if(colonne < 7)
+                break;
+            case 1://Haut
+                try
                 {
-                    if(this.play(ligne, colonne+1, direction, color, jeu, ligneDeb, colonneDeb))
+                    for(int i=ligne-2; i>0; i--)
                     {
-                        if(jeu)
+                        if(!playable)
                         {
-                            this.grille[ligne][colonne].setVal(color);
+                            if(this.grille[i][colonne].getVal()==color)
+                            {
+                                playable = true;
+                                lastline=i;
+                                i=ligne;
+                            }
+                            else if(this.grille[i][colonne].getVal() == CaseContent.VIDE)
+                            {
+                                playable = false;
+                                i=0;
+                            }
                         }
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-            case 4:
-                if(ligne < HEIGHT_GRID-1 && colonne < WIDTH_GRID-1)
-                {
-                    if(this.play(ligne+1, colonne+1, direction, color, jeu, ligneDeb, colonneDeb))
-                    {
-                        if(jeu)
+                        else if(jeu && playable && (i>lastline))
                         {
-                            this.grille[ligne][colonne].setVal(color);
+                            this.grille[i][colonne].setVal(color);
                         }
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    return (this.grille[ligne][colonne].getVal() == color);
-                }
-            case 5:
-                if(ligne < HEIGHT_GRID-1)
-                {
-                    if(this.play(ligne+1, colonne, direction, color, jeu, ligneDeb, colonneDeb))
-                    {
-                        if(jeu)
+                        else
                         {
-                            this.grille[ligne][colonne].setVal(color);
+                            i=0;
                         }
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
                     }
                 }
-                else
+                catch(Exception ex)
                 {
-                    return (this.grille[ligne][colonne].getVal() == color);
+                    System.out.println("Err Haut");
                 }
-            case 6:
-                if(ligne < HEIGHT_GRID-1 && colonne > 0 )
+                break;
+            case 2://Haut droite
+                try
                 {
-                    if(this.play(ligne+1, colonne-1, direction, color, jeu, ligneDeb, colonneDeb))
+                    int j = colonne + 2;
+                    for(int i=ligne-2; i>0; i--, j++)
                     {
-                        if(jeu)
+                        if(!playable)
                         {
-                            this.grille[ligne][colonne].setVal(color);
+                            if(this.grille[i][j].getVal()==color)
+                            {
+                                playable = true;
+                                lastline=i;
+                                lastcol=j;
+                                i=ligne;
+                                j=colonne;
+                            }
+                            else if(this.grille[i][j].getVal() == CaseContent.VIDE)
+                            {
+                                playable = false;
+                                i=0;
+                            }
                         }
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    return (this.grille[ligne][colonne].getVal() == color);
-                }
-            case 7:
-                if(colonne > 0)
-                {
-                    if(this.play(ligne, colonne-1, direction, color, jeu, ligneDeb, colonneDeb))
-                    {
-                        if(jeu)
+                        else if(jeu && playable && (i>lastline && j<lastcol))
                         {
-                            this.grille[ligne][colonne].setVal(color);
+                            this.grille[i][j].setVal(color);
                         }
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
+                        else
+                        {
+                            i=0;
+                        }
                     }
                 }
-                else
+                catch(Exception ex)
                 {
-                    return (this.grille[ligne][colonne].getVal() == color);
+                    System.out.println("Err Haut Droite");
                 }
+                break;
+            case 3://Droite
+                try
+                {
+                    for(int j=colonne+2; j<WIDTH_GRID; j++)
+                    {
+                        if(!playable)
+                        {
+                            if(this.grille[ligne][j].getVal()==color)
+                            {
+                                playable = true;
+                                lastcol=j;
+                                j=colonne;
+                            }
+                            else if(this.grille[ligne][j].getVal() == CaseContent.VIDE)
+                            {
+                                playable = false;
+                                j=WIDTH_GRID;
+                            }
+                        }
+                        else if(jeu && playable && (j<lastcol))
+                        {
+                            this.grille[ligne][j].setVal(color);
+                        }
+                        else
+                        {
+                            j=WIDTH_GRID;
+                        }
+                    }
+                }
+                catch(Exception ex)
+                {
+                    System.out.println("Err Droite");
+                }
+                break;
+            case 4://Bas droit
+                try
+                {
+                    int j = colonne + 2;
+                    for(int i=ligne+2; i<HEIGHT_GRID; i++, j++)
+                    {
+                        if(!playable)
+                        {
+                            if(this.grille[i][j].getVal()==color)
+                            {
+                                playable = true;
+                                lastline=i;
+                                lastcol=j;
+                                i=ligne;
+                                j=colonne;
+                            }
+                            else if(this.grille[i][j].getVal() == CaseContent.VIDE)
+                            {
+                                playable = false;
+                                i=HEIGHT_GRID;
+                            }
+                        }
+                        else if(jeu && playable && (i<lastline && j<lastcol))
+                        {
+                            this.grille[i][j].setVal(color);
+                        }
+                        else
+                        {
+                            i=HEIGHT_GRID;
+                        }
+                    }
+                }
+                catch(Exception ex)
+                {
+                    System.out.println("Err Bas Droite");
+                }
+                break;
+            case 5://Bas
+                try
+                {
+                    for(int i=ligne+2; i<HEIGHT_GRID; i++)
+                    {
+                        if(!playable)
+                        {
+                            if(this.grille[i][colonne].getVal()==color)
+                            {
+                                playable = true;
+                                lastline=i;
+                                i=ligne;
+                            }
+                            else if(this.grille[i][colonne].getVal() == CaseContent.VIDE)
+                            {
+                                playable = false;
+                                i=HEIGHT_GRID;
+                            }
+                        }
+                        else if(jeu && playable && (i<lastline))
+                        {
+                            this.grille[i][colonne].setVal(color);
+                        }
+                        else
+                        {
+                            i=HEIGHT_GRID;
+                        }
+                    }
+                }
+                catch(Exception ex)
+                {
+                    System.out.println("Err Bas");
+                }
+                break;
+            case 6://Bas gauche
+                try
+                {
+                    int j = colonne - 2;
+                    for(int i=ligne+2; i<HEIGHT_GRID; i++, j--)
+                    {
+                        if(!playable)
+                        {
+                            if(this.grille[i][j].getVal()==color)
+                            {
+                                playable = true;
+                                lastline=i;
+                                lastcol=j;
+                                i=ligne;
+                                j=colonne;
+                            }
+                            else if(this.grille[i][j].getVal() == CaseContent.VIDE)
+                            {
+                                playable = false;
+                                i=HEIGHT_GRID;
+                            }
+                        }
+                        else if(jeu && playable && (i<lastline && j>lastcol))
+                        {
+                            this.grille[i][j].setVal(color);
+                        }
+                        else
+                        {
+                            i=HEIGHT_GRID;
+                        }
+                    }
+                }
+                catch(Exception ex)
+                {
+                    System.out.println("Err Bas Gauche");
+                }
+                break;
+            case 7://Gauche
+                try
+                {
+                    for(int j=colonne-2; j>0; j--)
+                    {
+                        if(!playable)
+                        {
+                            if(this.grille[ligne][j].getVal()==color)
+                            {
+                                playable = true;
+                                lastcol=j;
+                                j=colonne;
+                            }
+                            else if(this.grille[ligne][j].getVal() == CaseContent.VIDE)
+                            {
+                                playable = false;
+                                j=0;
+                            }
+                        }
+                        else if(jeu && playable && (j>lastcol))
+                        {
+                            this.grille[ligne][j].setVal(color);
+                        }
+                        else
+                        {
+                            j=0;
+                        }
+                    }
+                }
+                catch(Exception ex)
+                {
+                    System.out.println("Err Gauche");
+                }
+                break;
         }
-        return false;
+        return playable;
     }
 
     /**
@@ -387,9 +460,11 @@ public class Grille
      * @param ligne La ligne de la case
      * @param colonne La colonne de la case
      * @param color La couleur du joueur
+     * @param adjacenteUniquement Booléen permettant de savoir si l'on veut connaitre
+     * uniquement si le pion est adjacent à des pièces ennemies, ou si un coup est jouable.
      * @return Un tableau de booléen contenant les directions jouables.
      */
-    public boolean[] getPlayableDirection(int ligne, int colonne, CaseContent color)
+    public boolean[] getPlayableDirection(int ligne, int colonne, CaseContent color, boolean adjacenteUniquement)
     {
         //On regarde tout d'abord si la case actuelle n'est pas une case isolée.
         boolean[] playable = new boolean[8];
@@ -454,11 +529,14 @@ public class Grille
             }
         }catch(Exception ex){}
         
-        for(int i=0; i<playable.length; i++)
+        if(!adjacenteUniquement)
         {
-            if(playable[i])
+            for(int i=0; i<playable.length; i++)
             {
-                playable[i] = this.play(ligne, colonne, i, color, false, ligne, colonne);
+                if(playable[i])
+                {
+                    playable[i] = this.play(ligne, colonne, i, color, false);
+                }
             }
         }
         return playable;
@@ -478,7 +556,7 @@ public class Grille
         {
             return false;
         }
-        boolean[] directions = this.getPlayableDirection(ligne, colonne, color);
+        boolean[] directions = this.getPlayableDirection(ligne, colonne, color, false);
         for(int i=0; i<directions.length; i++)
         {
             if(directions[i])
