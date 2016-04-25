@@ -1,13 +1,12 @@
 package reversi_modele;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.ArrayList;
 
 /**
  * Cette classe contient la représentation modèle du plateau de jeu.
  * @author yannick
  */
-public class Grille
+public class Grille implements Cloneable
 {
     /**
      * Pour plus de facilité, on définie deux variables publiques et statiques
@@ -17,17 +16,26 @@ public class Grille
     public static final int WIDTH_GRID = 8;
     
     /**
+     * Variable pour savoir de quelle couleur est le joueur
+     */
+    public static CaseContent PLAYER_COLOR = CaseContent.BLANC;
+    
+    /**
      * Variable représentant le plateau en lui même.
      */
     private Case[][] grille;
     
     /**
      * Conctructeur par défaut de la grille, il initialise une grille basique.
+     * @param generation Indique si il faut ou non générer une grille de départ basique.
      */
-    public Grille()
+    public Grille(boolean generation)
     {
         this.grille = new Case[HEIGHT_GRID][WIDTH_GRID];
-        initGrille();
+        if(generation)
+        {
+            initGrille();
+        }
     }
     
     /**
@@ -40,13 +48,25 @@ public class Grille
         {
             for(int j=0; j< HEIGHT_GRID; j++)
             {
-                this.grille[i][j] = new Case();
+                this.grille[i][j] = new Case(i,j);
             }
         }
         this.grille[3][3].setVal(CaseContent.BLANC);
         this.grille[4][4].setVal(CaseContent.BLANC);
         this.grille[4][3].setVal(CaseContent.NOIR);
         this.grille[3][4].setVal(CaseContent.NOIR);
+    }
+    
+    /**
+     * Cette fonction permet de créer une nouvelle case dans la grille 
+     * en fonction de sa couleur.
+     * @param ligne La ligne de la case
+     * @param colonne La colonne de la case
+     * @param val La couleur de la case
+     */
+    public void initCase(int ligne, int colonne, CaseContent val)
+    {
+        this.grille[ligne][colonne] = new Case(ligne, colonne, val);
     }
     
     /**
@@ -58,6 +78,25 @@ public class Grille
     public Case getCase(int ligne, int colonne)
     {
         return this.grille[ligne][colonne];
+    }
+    
+    /**
+     * Permet de savoir si la partie est terminée ou non.
+     * @return True si la partie est finie, False sinon.
+     */
+    public boolean isFinished()
+    {
+        for(int i=0; i<WIDTH_GRID; i++)
+        {
+            for(int j=0; j< HEIGHT_GRID; j++)
+            {
+                if(this.grille[i][j].getVal()==CaseContent.VIDE)
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
     
     /**
@@ -566,4 +605,145 @@ public class Grille
         }
         return false;
     }
+    
+    /**
+     * Cette fonction fait partie de l'algorithme MinMax. C'est la fonction 
+     * d'évaluation. Elle permet d'évaluer la grille dans une position donnée.
+     * @param color La couleur du joueur
+     * @return l'évaluation
+     */
+    public int evaluation(CaseContent color)
+    {
+        int score = 0;
+        int[][] caseValue ={
+            {8, -2, 3, 3, 3, 3, -2, 8},
+            {-2, 1, 2, 2, 2, 2, 1, -2},
+            {3, 2, 1, 1, 1, 1, 2, 3},
+            {3, 2, 1, 1, 1, 1, 2, 3},
+            {3, 2, 1, 1, 1, 1, 2, 3},
+            {3, 2, 1, 1, 1, 1, 2, 3},
+            {-2, 1, 2, 2, 2, 2, 1, -2},
+            {8, -2, 3, 3, 3, 3, -2, 8}
+        };
+        
+        for(int i=0; i<HEIGHT_GRID; i++)
+        {
+            for(int j=0; j<WIDTH_GRID; j++)
+            {
+                if(this.grille[i][j].getVal()==color)
+                {
+                    score += caseValue[i][j];
+                }
+            }
+        }
+        return score;
+    }
+            
+    
+    public ArrayList<Case> getPossibleMooves(CaseContent color)
+    {
+        ArrayList<Case> moves = new ArrayList<>();
+        for(int i=0; i<HEIGHT_GRID; i++)
+        {
+            for(int j=0; j<WIDTH_GRID; j++)
+            {
+                if(this.isPlayable(i, j, color))
+                {
+                    moves.add(this.grille[i][j]);
+                }
+            }
+        }
+        return moves;
+    }
+    
+    public Object[] MinMax(Grille g, CaseContent color, int profondeur)
+    {
+        if(g.isFinished() || profondeur == 0)
+        {
+            Object[] retour = new Object[2];
+            retour[0] = g.evaluation(color);
+            retour[1] = null;
+            return retour;
+        }
+        
+        int scoreMax;
+        Case bestMoove=null;
+        
+        if(color != PLAYER_COLOR)//Ici on maximise, c'est le tour de l'IA
+        {
+            scoreMax = Integer.MIN_VALUE;
+            ArrayList<Case> mooves = g.getPossibleMooves(color);
+            for(Case c : mooves)
+            {
+                Grille tmp = g.clonage();
+                tmp.executeTurn(color, c.getLigne(), c.getColonne());
+                Object[] score = MinMax(tmp, PLAYER_COLOR, profondeur-1);
+                if((int)score[0] > scoreMax)
+                {
+                    scoreMax = (int)score[0];
+                    bestMoove = c;
+                }
+            }
+        }
+        else //Ici on minimise, c'est le tour du joueur
+        {
+            scoreMax = Integer.MAX_VALUE;
+            ArrayList<Case> mooves = g.getPossibleMooves(color);
+            for(Case c : mooves)
+            {
+                Grille tmp = g.clonage();
+                tmp.executeTurn(color, c.getLigne(), c.getColonne());
+                Object[] score = MinMax(tmp, color, profondeur-1);
+                if((int)score[0] < scoreMax)
+                {
+                    scoreMax = (int)score[0];
+                    bestMoove = c;
+                }
+            }
+        }
+        
+        Object[] retour = new Object[2];
+        retour[0] = scoreMax;
+        retour[1] = bestMoove;
+        return retour;
+    }
+    
+    /**
+     * Permet d'obtenir un clone de la grille
+     * @return La nouvelle grille, clonée.
+     */
+    public Grille clonage()
+    {
+        try
+        {
+            return (Grille) this.clone();
+        } catch (CloneNotSupportedException ex)
+        {
+            System.err.println("Erreur lors du clonage.");
+        }
+        return null;
+    }
+
+    /**
+     * Surcharge de la fonction clone
+     * @return La grille clonnée
+     * @throws CloneNotSupportedException 
+     */
+    @Override
+    protected Object clone() throws CloneNotSupportedException
+    {
+        Grille g = new Grille(false);
+        for(int i=0; i<WIDTH_GRID; i++)
+        {
+            for(int j=0; j< HEIGHT_GRID; j++)
+            {
+                g.initCase(i, j, this.grille[i][j].getVal());
+            }
+        }
+        
+        return g;
+    }
+    
+    
+    
 }
