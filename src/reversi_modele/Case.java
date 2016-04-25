@@ -21,16 +21,22 @@ public class Case
     public static BufferedImage pionBlanc;
     public static BufferedImage pionNoirFocus;
     public static BufferedImage pionBlancFocus;
+    private int ligne;
+    private int colonne;
     private CaseContent val;
     
     
-    public Case()
+    public Case(int ligne, int colonne)
     {
-        val = CaseContent.VIDE;
+        this.ligne = ligne;
+        this.colonne = colonne;
+        this.val = CaseContent.VIDE;
     }
     
-    public Case(CaseContent val)
+    public Case(int ligne, int colonne, CaseContent val)
     {
+        this.ligne = ligne;
+        this.colonne = colonne;
         this.val = val;
     }
     
@@ -47,6 +53,16 @@ public class Case
         {
             Logger.getLogger(Case.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    public int getLigne()
+    {
+        return ligne;
+    }
+
+    public int getColonne()
+    {
+        return colonne;
     }
     
     public CaseContent getVal()
