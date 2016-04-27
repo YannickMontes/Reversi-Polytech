@@ -9,6 +9,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import reversi_modele.Case;
 import reversi_modele.CaseContent;
 import reversi_modele.Grille;
 
@@ -23,36 +24,40 @@ public class MainWindow extends JFrame
     private JPanel gamePanel;
     private VueOption optionsPane;
     private VueGrille gridComponent;
+    private boolean inGame;
     
     public MainWindow(String name, Grille g)
     {
         super(name);
+        this.inGame = false;
         this.plateau = g;
         this.init();
-//        while(!plateau.isFinished())
-//        {
-//            if(VueGrille.NEXT_TURN!=Grille.PLAYER_COLOR)
-//            {
-//                Case tmp = (Case)plateau.MinMax(g, CaseContent.NOIR, 4)[1];
-//                plateau.executeTurn(CaseContent.NOIR, tmp.getLigne(), tmp.getColonne());
-//                gridComponent.repaint();
-//                VueGrille.NEXT_TURN = Grille.PLAYER_COLOR;
-//            }
-//            try
-//            {
-//                Thread.sleep(500);
-//            } catch (InterruptedException ex)
-//            {
-//                Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//        }
+        while(!plateau.isFinished())
+        {
+            if(VueGrille.NEXT_TURN!=VueGrille.PLAYER_COLOR)
+            {
+                Case tmp = (Case)plateau.MinMax(plateau, VueGrille.NEXT_TURN, 4)[1];
+                plateau.executeTurn(VueGrille.NEXT_TURN, tmp.getLigne(), tmp.getColonne());
+                gridComponent.repaint();
+                VueGrille.NEXT_TURN = VueGrille.PLAYER_COLOR;
+            }
+            try
+            {
+                Thread.sleep(500);
+            } catch (InterruptedException ex)
+            {
+            }
+        }
     }
     
     private void init()
     {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setVisible(true);
-        this.initGraph();
+        this.gridComponent = new VueGrille(plateau, CaseContent.NOIR);
+        this.add(this.gridComponent);
+        this.pack();
+        //this.initGraph();
     }
     
     private void initGraph()
@@ -83,5 +88,32 @@ public class MainWindow extends JFrame
         this.gridComponent = new VueGrille(this.plateau, color);
         this.gamePanel.add(this.gridComponent);
         this.pack();
+        this.inGame = true;
+    }
+    
+    public void principalLoop()
+    {
+        while(true)
+        {
+            if(inGame)
+            {
+                while(!plateau.isFinished())
+                {
+                    if(VueGrille.NEXT_TURN!=VueGrille.PLAYER_COLOR)
+                    {
+                        Case tmp = (Case)plateau.MinMax(plateau, VueGrille.NEXT_TURN, 4)[1];
+                        plateau.executeTurn(VueGrille.NEXT_TURN, tmp.getLigne(), tmp.getColonne());
+                        gridComponent.repaint();
+                        VueGrille.NEXT_TURN = VueGrille.PLAYER_COLOR;
+                    }
+//                    try
+//                    {
+//                        Thread.sleep(500);
+//                    } catch (InterruptedException ex)
+//                    {
+//                    }
+                }
+            }
+        }
     }
 }
