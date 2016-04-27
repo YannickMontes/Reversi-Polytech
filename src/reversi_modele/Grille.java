@@ -1,6 +1,7 @@
 package reversi_modele;
 
 import java.util.ArrayList;
+import reversi_vue.VueGrille;
 
 /**
  * Cette classe contient la représentation modèle du plateau de jeu.
@@ -14,11 +15,6 @@ public class Grille implements Cloneable
      */
     public static final int HEIGHT_GRID = 8;
     public static final int WIDTH_GRID = 8;
-    
-    /**
-     * Variable pour savoir de quelle couleur est le joueur
-     */
-    public static CaseContent PLAYER_COLOR = CaseContent.BLANC;
     
     /**
      * Variable représentant le plateau en lui même.
@@ -109,7 +105,7 @@ public class Grille implements Cloneable
     public void executeTurn(CaseContent color, int ligne, int colonne)
     {
         //If the selected case isn't in the grid
-        if(ligne < 0 || ligne > 7 || colonne < 0 || colonne > 7)
+        if(ligne < 0 || ligne > HEIGHT_GRID-1 || colonne < 0 || colonne > WIDTH_GRID-1)
         {
             return;
         }
@@ -199,7 +195,7 @@ public class Grille implements Cloneable
                 try
                 {
                     int j = colonne - 2;
-                    for(int i=ligne-2; i>0; i--, j--)
+                    for(int i=ligne-2; i>=0; i--, j--)
                     {
                         if(!playable)
                         {
@@ -214,16 +210,16 @@ public class Grille implements Cloneable
                             else if(this.grille[i][j].getVal() == CaseContent.VIDE)
                             {
                                 playable = false;
-                                i=0;
+                                i=-1;
                             }
                         }
-                        else if(jeu && playable && (i>lastline && j>lastcol))
+                        else if(jeu && playable && (i>=lastline && j>=lastcol))
                         {
                             this.grille[i][j].setVal(color);
                         }
                         else
                         {
-                            i=0;
+                            i=-1;
                         }
                     }
                 }
@@ -235,7 +231,7 @@ public class Grille implements Cloneable
             case 1://Haut
                 try
                 {
-                    for(int i=ligne-2; i>0; i--)
+                    for(int i=ligne-2; i>=0; i--)
                     {
                         if(!playable)
                         {
@@ -248,16 +244,16 @@ public class Grille implements Cloneable
                             else if(this.grille[i][colonne].getVal() == CaseContent.VIDE)
                             {
                                 playable = false;
-                                i=0;
+                                i=-1;
                             }
                         }
-                        else if(jeu && playable && (i>lastline))
+                        else if(jeu && playable && (i>=lastline))
                         {
                             this.grille[i][colonne].setVal(color);
                         }
                         else
                         {
-                            i=0;
+                            i=-1;
                         }
                     }
                 }
@@ -270,7 +266,7 @@ public class Grille implements Cloneable
                 try
                 {
                     int j = colonne + 2;
-                    for(int i=ligne-2; i>0; i--, j++)
+                    for(int i=ligne-2; i>=0; i--, j++)
                     {
                         if(!playable)
                         {
@@ -285,16 +281,16 @@ public class Grille implements Cloneable
                             else if(this.grille[i][j].getVal() == CaseContent.VIDE)
                             {
                                 playable = false;
-                                i=0;
+                                i=-1;
                             }
                         }
-                        else if(jeu && playable && (i>lastline && j<lastcol))
+                        else if(jeu && playable && (i>=lastline && j<=lastcol))
                         {
                             this.grille[i][j].setVal(color);
                         }
                         else
                         {
-                            i=0;
+                            i=-1;
                         }
                     }
                 }
@@ -322,7 +318,7 @@ public class Grille implements Cloneable
                                 j=WIDTH_GRID;
                             }
                         }
-                        else if(jeu && playable && (j<lastcol))
+                        else if(jeu && playable && (j<=lastcol))
                         {
                             this.grille[ligne][j].setVal(color);
                         }
@@ -359,7 +355,7 @@ public class Grille implements Cloneable
                                 i=HEIGHT_GRID;
                             }
                         }
-                        else if(jeu && playable && (i<lastline && j<lastcol))
+                        else if(jeu && playable && (i<=lastline && j<=lastcol))
                         {
                             this.grille[i][j].setVal(color);
                         }
@@ -393,7 +389,7 @@ public class Grille implements Cloneable
                                 i=HEIGHT_GRID;
                             }
                         }
-                        else if(jeu && playable && (i<lastline))
+                        else if(jeu && playable && (i<=lastline))
                         {
                             this.grille[i][colonne].setVal(color);
                         }
@@ -430,7 +426,7 @@ public class Grille implements Cloneable
                                 i=HEIGHT_GRID;
                             }
                         }
-                        else if(jeu && playable && (i<lastline && j>lastcol))
+                        else if(jeu && playable && (i<=lastline && j>=lastcol))
                         {
                             this.grille[i][j].setVal(color);
                         }
@@ -448,7 +444,7 @@ public class Grille implements Cloneable
             case 7://Gauche
                 try
                 {
-                    for(int j=colonne-2; j>0; j--)
+                    for(int j=colonne-2; j>=0; j--)
                     {
                         if(!playable)
                         {
@@ -461,16 +457,16 @@ public class Grille implements Cloneable
                             else if(this.grille[ligne][j].getVal() == CaseContent.VIDE)
                             {
                                 playable = false;
-                                j=0;
+                                j=-1;
                             }
                         }
-                        else if(jeu && playable && (j>lastcol))
+                        else if(jeu && playable && (j>=lastcol))
                         {
                             this.grille[ligne][j].setVal(color);
                         }
                         else
                         {
-                            j=0;
+                            j=-1;
                         }
                     }
                 }
@@ -669,7 +665,7 @@ public class Grille implements Cloneable
         int scoreMax;
         Case bestMoove=null;
         
-        if(color != PLAYER_COLOR)//Ici on maximise, c'est le tour de l'IA
+        if(color != VueGrille.PLAYER_COLOR)//Ici on maximise, c'est le tour de l'IA
         {
             scoreMax = Integer.MIN_VALUE;
             ArrayList<Case> mooves = g.getPossibleMooves(color);
@@ -677,7 +673,7 @@ public class Grille implements Cloneable
             {
                 Grille tmp = g.clonage();
                 tmp.executeTurn(color, c.getLigne(), c.getColonne());
-                Object[] score = MinMax(tmp, PLAYER_COLOR, profondeur-1);
+                Object[] score = MinMax(tmp, VueGrille.PLAYER_COLOR, profondeur-1);
                 if((int)score[0] > scoreMax)
                 {
                     scoreMax = (int)score[0];

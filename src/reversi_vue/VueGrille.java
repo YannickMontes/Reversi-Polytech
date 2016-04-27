@@ -26,11 +26,13 @@ public class VueGrille extends JComponent implements MouseMotionListener, MouseL
 {
     private Grille grille;
     public static CaseContent NEXT_TURN;
+    public static CaseContent PLAYER_COLOR;
     private Case focused;
 
-    public VueGrille(Grille g)
+    public VueGrille(Grille g, CaseContent playercolor)
     {
         super();
+        VueGrille.PLAYER_COLOR = playercolor;
         focused = null;
         this.NEXT_TURN = CaseContent.NOIR;
         this.addMouseMotionListener(this);
@@ -92,11 +94,11 @@ public class VueGrille extends JComponent implements MouseMotionListener, MouseL
     @Override
     public void mouseMoved(MouseEvent e)
     {
-        if(VueGrille.NEXT_TURN == Grille.PLAYER_COLOR)
+        if(VueGrille.NEXT_TURN == VueGrille.PLAYER_COLOR)
         {
             int i = e.getY()/100;
             int j = e.getX()/100;
-            if((i>0 && i<Grille.HEIGHT_GRID && j>0 && j<Grille.WIDTH_GRID) && this.grille.getCase(i, j).getVal()==CaseContent.VIDE)
+            if((i>=0 && i<Grille.HEIGHT_GRID && j>=0 && j<Grille.WIDTH_GRID) && this.grille.getCase(i, j).getVal()==CaseContent.VIDE)
             {
                 if(this.grille.isPlayable(e.getY()/100, e.getX()/100, NEXT_TURN))
                 {
