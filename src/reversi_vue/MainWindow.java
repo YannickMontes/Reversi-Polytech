@@ -36,11 +36,19 @@ public class MainWindow extends JFrame
         {
             if(VueGrille.NEXT_TURN!=VueGrille.PLAYER_COLOR)
             {
-                Case tmp = (Case)plateau.MinMax(plateau, VueGrille.NEXT_TURN, 4)[1];
+                Case tmp = (Case)plateau.AlphaBeta(plateau, VueGrille.NEXT_TURN, 8, Integer.MIN_VALUE, Integer.MAX_VALUE)[1];
                 plateau.executeTurn(VueGrille.NEXT_TURN, tmp.getLigne(), tmp.getColonne());
                 gridComponent.repaint();
                 VueGrille.NEXT_TURN = VueGrille.PLAYER_COLOR;
             }
+            /* IA CONTRE IA
+            else
+            {
+                Case tmp = (Case)plateau.AlphaBeta(plateau, VueGrille.NEXT_TURN, 4, Integer.MIN_VALUE, Integer.MAX_VALUE)[1];
+                plateau.executeTurn(VueGrille.NEXT_TURN, tmp.getLigne(), tmp.getColonne());
+                gridComponent.repaint();
+                VueGrille.NEXT_TURN = CaseContent.BLANC;
+            }*/
             try
             {
                 Thread.sleep(500);

@@ -225,7 +225,6 @@ public class Grille implements Cloneable
                 }
                 catch(Exception ex)
                 {
-                    System.out.println("Err Haut Gauche");
                 }
                 break;
             case 1://Haut
@@ -259,7 +258,6 @@ public class Grille implements Cloneable
                 }
                 catch(Exception ex)
                 {
-                    System.out.println("Err Haut");
                 }
                 break;
             case 2://Haut droite
@@ -296,7 +294,6 @@ public class Grille implements Cloneable
                 }
                 catch(Exception ex)
                 {
-                    System.out.println("Err Haut Droite");
                 }
                 break;
             case 3://Droite
@@ -330,7 +327,6 @@ public class Grille implements Cloneable
                 }
                 catch(Exception ex)
                 {
-                    System.out.println("Err Droite");
                 }
                 break;
             case 4://Bas droit
@@ -367,7 +363,6 @@ public class Grille implements Cloneable
                 }
                 catch(Exception ex)
                 {
-                    System.out.println("Err Bas Droite");
                 }
                 break;
             case 5://Bas
@@ -401,7 +396,6 @@ public class Grille implements Cloneable
                 }
                 catch(Exception ex)
                 {
-                    System.out.println("Err Bas");
                 }
                 break;
             case 6://Bas gauche
@@ -438,7 +432,6 @@ public class Grille implements Cloneable
                 }
                 catch(Exception ex)
                 {
-                    System.out.println("Err Bas Gauche");
                 }
                 break;
             case 7://Gauche
@@ -472,7 +465,6 @@ public class Grille implements Cloneable
                 }
                 catch(Exception ex)
                 {
-                    System.out.println("Err Gauche");
                 }
                 break;
         }
@@ -610,6 +602,23 @@ public class Grille implements Cloneable
      */
     public int evaluation(CaseContent color)
     {
+        //On compte le nombre de billes de la couleur
+        
+        int score =0; 
+        
+        for(int i=0; i<HEIGHT_GRID; i++)
+        {
+            for(int j=0; j<WIDTH_GRID; j++)
+            {
+                if(this.grille[i][j].getVal()==color)
+                {
+                    score++;
+                }
+            }
+        }
+        
+        return score;
+        /*
         int score = 0;
         int[][] caseValue ={
             {8, -2, 3, 3, 3, 3, -2, 8},
@@ -633,6 +642,7 @@ public class Grille implements Cloneable
             }
         }
         return score;
+        */
     }
             
     
@@ -700,6 +710,40 @@ public class Grille implements Cloneable
         
         Object[] retour = new Object[2];
         retour[0] = scoreMax;
+        retour[1] = bestMoove;
+        return retour;
+    }
+    
+    public Object[] AlphaBeta(Grille g, CaseContent color, int profondeur, int alpha, int beta)
+    {
+        if(g.isFinished() || profondeur == 0)
+        {
+            Object[] retour = new Object[2];
+            retour[0] = g.evaluation(color);
+            retour[1] = null;
+            return retour;
+        }
+        
+        Case bestMoove=null;
+        ArrayList<Case> mooves = g.getPossibleMooves(color);
+        for(Case c : mooves)
+        {
+            Grille tmp = g.clonage();
+            tmp.executeTurn(color, c.getLigne(), c.getColonne());
+            Object[] score = AlphaBeta(tmp, VueGrille.PLAYER_COLOR, profondeur-1, -beta, -alpha);
+            if((int)score[0] >= alpha)
+            {
+                alpha = (int)score[0];
+                bestMoove = c;
+                if(alpha >= beta)
+                {
+                    break;
+                }
+            }
+        }
+        
+        Object[] retour = new Object[2];
+        retour[0] = alpha;
         retour[1] = bestMoove;
         return retour;
     }
