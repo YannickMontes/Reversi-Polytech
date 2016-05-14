@@ -22,11 +22,23 @@ public class Grille implements Cloneable
     private Case[][] grille;
     
     /**
+     * Variable contenant un chiffre qui représente l'algo à utiliser pour l'IA.
+     */
+    private int algoIA;
+    
+    /**
+     * Variable representant la profondeur max de l'algo.
+     */
+    private int profondeur;
+    
+    /**
      * Conctructeur par défaut de la grille, il initialise une grille basique.
      * @param generation Indique si il faut ou non générer une grille de départ basique.
      */
-    public Grille(boolean generation)
+    public Grille(boolean generation, int algo, int difficulty)
     {
+        this.algoIA = algo;
+        this.profondeur = difficulty;
         this.grille = new Case[HEIGHT_GRID][WIDTH_GRID];
         if(generation)
         {
@@ -662,9 +674,9 @@ public class Grille implements Cloneable
         return moves;
     }
     
-    public Object[] MinMax(Grille g, CaseContent color, int profondeur)
+    public Object[] MinMax(Grille g, CaseContent color, int prof)
     {
-        if(g.isFinished() || profondeur <= 0)
+        if(g.isFinished() || prof <= 0)
         {
             Object[] retour = new Object[2];
             retour[0] = g.evaluation(color);
@@ -683,7 +695,7 @@ public class Grille implements Cloneable
             {
                 Grille tmp = g.clonage();
                 tmp.executeTurn(color, c.getLigne(), c.getColonne());
-                Object[] score = MinMax(tmp, VueGrille.PLAYER_COLOR, profondeur-1);
+                Object[] score = MinMax(tmp, VueGrille.PLAYER_COLOR, prof-1);
                 if((int)score[0] > scoreMax)
                 {
                     scoreMax = (int)score[0];
@@ -699,7 +711,7 @@ public class Grille implements Cloneable
             {
                 Grille tmp = g.clonage();
                 tmp.executeTurn(color, c.getLigne(), c.getColonne());
-                Object[] score = MinMax(tmp, color, profondeur-1);
+                Object[] score = MinMax(tmp, color, prof-1);
                 if((int)score[0] < scoreMax)
                 {
                     scoreMax = (int)score[0];
@@ -714,9 +726,9 @@ public class Grille implements Cloneable
         return retour;
     }
     
-    public Object[] AlphaBeta(Grille g, CaseContent color, int profondeur, int alpha, int beta)
+    public Object[] AlphaBeta(Grille g, CaseContent color, int prof, int alpha, int beta)
     {
-        if(g.isFinished() || profondeur <= 0)
+        if(g.isFinished() || prof <= 0)
         {
             Object[] retour = new Object[2];
             retour[0] = g.evaluation(color);
@@ -734,11 +746,11 @@ public class Grille implements Cloneable
             Object[] score;
             if(color == VueGrille.PLAYER_COLOR)
             {
-                score = AlphaBeta(tmp, VueGrille.IA_COLOR, profondeur-1, -beta, -alpha);
+                score = AlphaBeta(tmp, VueGrille.IA_COLOR, prof-1, -beta, -alpha);
             }
             else
             {
-                score = AlphaBeta(tmp, VueGrille.PLAYER_COLOR, profondeur-1, -beta, -alpha);
+                score = AlphaBeta(tmp, VueGrille.PLAYER_COLOR, prof-1, -beta, -alpha);
             }
             int val = -1* (int)score[0];
             if(val >= meilleur_score)
@@ -788,7 +800,7 @@ public class Grille implements Cloneable
     @Override
     protected Object clone() throws CloneNotSupportedException
     {
-        Grille g = new Grille(false);
+        Grille g = new Grille(false, this.algoIA, this.profondeur);
         for(int i=0; i<WIDTH_GRID; i++)
         {
             for(int j=0; j< HEIGHT_GRID; j++)
@@ -799,7 +811,32 @@ public class Grille implements Cloneable
         
         return g;
     }
+
+    public void IA_Turn()
+    {
+        Case tmp = null;
+        if(this.algoIA == 0)
+        {
+            tmp = (Case) this.MinMax(this, VueGrille.IA_COLOR, this.profondeur)[1];
+            
+        }
+        else
+        {
+            tmp = (Case) this.AlphaBeta(this, VueGrille.IA_COLOR, this.profondeur, Integer.MIN_VALUE, Integer.MAX_VALUE)[1];
+        }
+        if(tmp!=null)
+        {            
+            this.executeTurn(VueGrille.IA_COLOR, tmp.getLigne(), tmp.getColonne());
+        }
+        VueGrille.NEXT_TURN = VueGrille.PLAYER_COLOR;
+    }
     
-    
-    
+    public boolean canPlay(CaseContent color)
+    {
+        if(this.getPossibleMooves(color).isEmpty())
+        {
+            return false;
+        }
+        return true;
+    }
 }

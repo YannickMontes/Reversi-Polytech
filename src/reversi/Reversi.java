@@ -20,7 +20,7 @@ public class Reversi
      */
     public static void main(String[] args)
     {        
-        Grille g = new Grille(true);
+        Grille g = new Grille(true, 0, 0);
         g.getCase(0, 0).initImages();
         MainWindow mw = new MainWindow("Reversi", g);
     }

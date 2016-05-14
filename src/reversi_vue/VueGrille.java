@@ -13,7 +13,10 @@ import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import reversi_modele.Case;
 import reversi_modele.CaseContent;
 import reversi_modele.Grille;
@@ -117,7 +120,6 @@ public class VueGrille extends JComponent implements MouseMotionListener, MouseL
                 {
                     focused = null;
                 }
-                this.repaint();
             }
             else
             {
@@ -127,7 +129,10 @@ public class VueGrille extends JComponent implements MouseMotionListener, MouseL
         else
         {
             focused = null;
+            this.grille.IA_Turn();
         }
+        this.repaint();
+        this.checkConditions();
     }
 
     @Override
@@ -143,19 +148,23 @@ public class VueGrille extends JComponent implements MouseMotionListener, MouseL
     @Override
     public void mouseReleased(MouseEvent e)
     {
-        if(this.grille.isPlayable(e.getY()/100, e.getX()/100, NEXT_TURN))
+        if(NEXT_TURN == PLAYER_COLOR)
         {
-            this.grille.executeTurn(NEXT_TURN,e.getY()/100, e.getX()/100);
-            if(NEXT_TURN == CaseContent.BLANC)
+            if(this.grille.isPlayable(e.getY()/100, e.getX()/100, NEXT_TURN))
             {
-                NEXT_TURN = CaseContent.NOIR;
-            }
-            else
-            {
-                NEXT_TURN = CaseContent.BLANC;
-            }
-            this.repaint();
+                this.grille.executeTurn(NEXT_TURN,e.getY()/100, e.getX()/100);
+                if(NEXT_TURN == CaseContent.BLANC)
+                {
+                    NEXT_TURN = CaseContent.NOIR;
+                }
+                else
+                {
+                    NEXT_TURN = CaseContent.BLANC;
+                }
+                this.repaint();
+            }   
         }
+        this.checkConditions();
     }
 
     @Override
@@ -166,5 +175,49 @@ public class VueGrille extends JComponent implements MouseMotionListener, MouseL
     @Override
     public void mouseExited(MouseEvent e)
     {
+    }
+
+    private void showEndWindow()
+    {
+        JDialog endWindow = new JDialog();
+        endWindow.setTitle("Fin de la partie");
+        endWindow.setModal(true);
+        endWindow.show();
+    }
+    
+    private void checkConditions()
+    {
+        if(this.grille.isFinished())
+        {
+            this.showEndWindow();
+        }
+        else
+        {
+            if(!this.grille.canPlay(NEXT_TURN))
+            {
+                if(NEXT_TURN == PLAYER_COLOR)
+                {
+                    if(this.grille.canPlay(IA_COLOR))
+                    {
+                        NEXT_TURN = IA_COLOR;
+                    }
+                    else
+                    {
+                        this.showEndWindow();
+                    }
+                }
+                else
+                {
+                    if(this.grille.canPlay(PLAYER_COLOR))
+                    {
+                        NEXT_TURN = PLAYER_COLOR;
+                    }
+                    else
+                    {
+                        this.showEndWindow();
+                    }
+                }
+            }   
+        }
     }
 }
