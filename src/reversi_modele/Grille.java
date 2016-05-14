@@ -664,7 +664,7 @@ public class Grille implements Cloneable
     
     public Object[] MinMax(Grille g, CaseContent color, int profondeur)
     {
-        if(g.isFinished() || profondeur == 0)
+        if(g.isFinished() || profondeur <= 0)
         {
             Object[] retour = new Object[2];
             retour[0] = g.evaluation(color);
@@ -716,7 +716,7 @@ public class Grille implements Cloneable
     
     public Object[] AlphaBeta(Grille g, CaseContent color, int profondeur, int alpha, int beta)
     {
-        if(g.isFinished() || profondeur == 0)
+        if(g.isFinished() || profondeur <= 0)
         {
             Object[] retour = new Object[2];
             retour[0] = g.evaluation(color);
@@ -724,26 +724,42 @@ public class Grille implements Cloneable
             return retour;
         }
         
-        Case bestMoove=null;
+        Case bestMoove = null;
         ArrayList<Case> mooves = g.getPossibleMooves(color);
+        int meilleur_score = Integer.MIN_VALUE;
         for(Case c : mooves)
         {
             Grille tmp = g.clonage();
             tmp.executeTurn(color, c.getLigne(), c.getColonne());
-            Object[] score = AlphaBeta(tmp, VueGrille.PLAYER_COLOR, profondeur-1, -beta, -alpha);
-            if((int)score[0] >= alpha)
+            Object[] score;
+            if(color == VueGrille.PLAYER_COLOR)
             {
-                alpha = (int)score[0];
-                bestMoove = c;
-                if(alpha >= beta)
+                score = AlphaBeta(tmp, VueGrille.IA_COLOR, profondeur-1, -beta, -alpha);
+            }
+            else
+            {
+                score = AlphaBeta(tmp, VueGrille.PLAYER_COLOR, profondeur-1, -beta, -alpha);
+            }
+            int val = -1* (int)score[0];
+            if(val >= meilleur_score)
+            {
+                meilleur_score = val;
+                if(meilleur_score > alpha)
                 {
-                    break;
+                    alpha = meilleur_score;
+                    bestMoove = c;
+                    if(alpha >= beta)
+                    {
+                        Object[] retour = new Object[2];
+                        retour[0] = meilleur_score;
+                        retour[1] = c;
+                    }
                 }
             }
         }
         
         Object[] retour = new Object[2];
-        retour[0] = alpha;
+        retour[0] = meilleur_score;
         retour[1] = bestMoove;
         return retour;
     }
