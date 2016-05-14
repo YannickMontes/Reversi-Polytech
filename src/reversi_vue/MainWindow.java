@@ -36,7 +36,9 @@ public class MainWindow extends JFrame
         {
             if(VueGrille.NEXT_TURN!=VueGrille.PLAYER_COLOR)
             {
+                long current_time = System.currentTimeMillis();
                 Case tmp = (Case)plateau.AlphaBeta(plateau, VueGrille.NEXT_TURN, 8, Integer.MIN_VALUE, Integer.MAX_VALUE)[1];
+                System.out.println("Temps d'exécution de l'algo: "+(System.currentTimeMillis()-current_time)+" millisecondes");
                 plateau.executeTurn(VueGrille.NEXT_TURN, tmp.getLigne(), tmp.getColonne());
                 gridComponent.repaint();
                 VueGrille.NEXT_TURN = VueGrille.PLAYER_COLOR;
@@ -51,7 +53,7 @@ public class MainWindow extends JFrame
             }*/
             try
             {
-                Thread.sleep(500);
+                Thread.sleep(1);
             } catch (InterruptedException ex)
             {
             }

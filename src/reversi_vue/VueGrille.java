@@ -27,12 +27,21 @@ public class VueGrille extends JComponent implements MouseMotionListener, MouseL
     private Grille grille;
     public static CaseContent NEXT_TURN;
     public static CaseContent PLAYER_COLOR;
+    public static CaseContent IA_COLOR;
     private Case focused;
 
     public VueGrille(Grille g, CaseContent playercolor)
     {
         super();
         VueGrille.PLAYER_COLOR = playercolor;
+        if(VueGrille.PLAYER_COLOR == CaseContent.NOIR)
+        {
+            VueGrille.IA_COLOR = CaseContent.BLANC;
+        }
+        else
+        {
+            VueGrille.IA_COLOR = CaseContent.NOIR;
+        }
         focused = null;
         this.NEXT_TURN = CaseContent.NOIR;
         this.addMouseMotionListener(this);
