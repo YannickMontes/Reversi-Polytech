@@ -1,7 +1,6 @@
 package reversi_modele;
 
 import java.util.ArrayList;
-import reversi_vue.VueGrille;
 
 /**
  * Cette classe contient la représentation modèle du plateau de jeu.
@@ -15,6 +14,17 @@ public class Grille implements Cloneable
      */
     public static final int HEIGHT_GRID = 8;
     public static final int WIDTH_GRID = 8;
+    
+    /**
+     * Ces trois constantes sont utiles au bon déroulement du jeu, et a la facilité
+     * de repérage du joueur et de l'IA dans le code. NEXT_TURN permet de savoir
+     * qui doit jouer le prochain tour. Ces variables sont statiques, car modifiables
+     * en dehors de la classe, et utilisable en dehors également, cependant elles doivent
+     * être uniques.
+     */
+    public static CaseContent NEXT_TURN;
+    public static CaseContent PLAYER_COLOR;
+    public static CaseContent IA_COLOR;
     
     /**
      * Variable représentant le plateau en lui même.
@@ -607,57 +617,104 @@ public class Grille implements Cloneable
     }
     
     /**
-     * Cette fonction fait partie de l'algorithme MinMax. C'est la fonction 
+     * Cette fonction fait partie de l'algorithme MinMax, ainsi qu'Alpha-Beta. C'est la fonction 
      * d'évaluation. Elle permet d'évaluer la grille dans une position donnée.
      * @param color La couleur du joueur
      * @return l'évaluation
      */
-    public int evaluation(CaseContent color)
+    public float evaluation(CaseContent color)
     {
-        //On compte le nombre de billes de la couleur
+        float score =0; 
+        float nbBilles = 0;
+        float place = 0;
+        float nbMultiplier = 1;
+        float placeMultiplier = 0;
         
-        int score =0; 
+        int nbCases = this.getNbBusyCase(); //On regarde le nombre de cases occupées
         
-        for(int i=0; i<HEIGHT_GRID; i++)
+        /**
+         * Voici le postulat de cette fonction d'évaluation. En début de partie, 
+         * on préviligie le fait de manger le plus de pions possibles a l'adversaire.
+         * En milieu de partie, on porte une intention plus particulière au placement de chaque pions
+         * (i.e. on essaye de coloniser les coins).
+         * En fin de partie, on re-accorde plus d'importance aux nombres de pièces mangées.
+         */
+        if(nbCases < (WIDTH_GRID*HEIGHT_GRID)/5)
         {
-            for(int j=0; j<WIDTH_GRID; j++)
+            placeMultiplier = 0.2f;
+        }
+        else if(nbCases > ((WIDTH_GRID*HEIGHT_GRID)/5) && nbCases < (WIDTH_GRID*HEIGHT_GRID)/4)
+        {
+            placeMultiplier = 1f;
+        }
+        else if(nbCases > ((WIDTH_GRID*HEIGHT_GRID)/4) && nbCases < (WIDTH_GRID*HEIGHT_GRID)/3)
+        {
+            placeMultiplier = 1.5f;
+        }
+        else if(nbCases > ((WIDTH_GRID*HEIGHT_GRID)/3) && nbCases < (WIDTH_GRID*HEIGHT_GRID)/2)
+        {
+            placeMultiplier = 2f;
+        }
+        else if(nbCases > ((WIDTH_GRID*HEIGHT_GRID)/2) && nbCases < ((WIDTH_GRID*HEIGHT_GRID)/2 + (WIDTH_GRID*HEIGHT_GRID)/5))
+        {
+            placeMultiplier = 1.5f;
+            nbMultiplier = 1.8f;
+        }
+        else if(nbCases > ((WIDTH_GRID*HEIGHT_GRID)/2) && nbCases < ((WIDTH_GRID*HEIGHT_GRID)/2 + (WIDTH_GRID*HEIGHT_GRID)/4))
+        {
+            placeMultiplier = 1.5f;
+            nbMultiplier = 2f;
+        }
+        else if(nbCases > ((WIDTH_GRID*HEIGHT_GRID)/2) && nbCases < ((WIDTH_GRID*HEIGHT_GRID)/2 + (WIDTH_GRID*HEIGHT_GRID)/3))
+        {
+            placeMultiplier = 0.5f;
+            nbMultiplier = 2f;
+        }
+        else if(nbCases > ((WIDTH_GRID*HEIGHT_GRID)/2) && nbCases < ((WIDTH_GRID*HEIGHT_GRID)/2 + (WIDTH_GRID*HEIGHT_GRID)/2))
+        {
+            placeMultiplier = 0.2f;
+            nbMultiplier = 2f;
+        }
+            
+        
+        nbBilles = countPieces(color);
+        
+        if(placeMultiplier != 0)
+        {
+            //Ce tableau contient la valeur que vaut un pion s'il est a tel place.
+            float[][] caseValue ={
+                {8, -2, 3, 3, 3, 3, -2, 8},
+                {-2, 1, 2, 2, 2, 2, 1, -2},
+                {3, 2, 1, 1, 1, 1, 2, 3},
+                {3, 2, 1, 1, 1, 1, 2, 3},
+                {3, 2, 1, 1, 1, 1, 2, 3},
+                {3, 2, 1, 1, 1, 1, 2, 3},
+                {-2, 1, 2, 2, 2, 2, 1, -2},
+                {8, -2, 3, 3, 3, 3, -2, 8}
+            };
+
+            for(int i=0; i<HEIGHT_GRID; i++)
             {
-                if(this.grille[i][j].getVal()==color)
+                for(int j=0; j<WIDTH_GRID; j++)
                 {
-                    score++;
+                    if(this.grille[i][j].getVal()==color)
+                    {
+                        place += caseValue[i][j];
+                    }
                 }
             }
         }
         
-        return score;
-        /*
-        int score = 0;
-        int[][] caseValue ={
-            {8, -2, 3, 3, 3, 3, -2, 8},
-            {-2, 1, 2, 2, 2, 2, 1, -2},
-            {3, 2, 1, 1, 1, 1, 2, 3},
-            {3, 2, 1, 1, 1, 1, 2, 3},
-            {3, 2, 1, 1, 1, 1, 2, 3},
-            {3, 2, 1, 1, 1, 1, 2, 3},
-            {-2, 1, 2, 2, 2, 2, 1, -2},
-            {8, -2, 3, 3, 3, 3, -2, 8}
-        };
+        score = (nbBilles * nbMultiplier) + (place*placeMultiplier);
         
-        for(int i=0; i<HEIGHT_GRID; i++)
-        {
-            for(int j=0; j<WIDTH_GRID; j++)
-            {
-                if(this.grille[i][j].getVal()==color)
-                {
-                    score += caseValue[i][j];
-                }
-            }
-        }
         return score;
-        */
     }
             
-    
+    /**
+     * Cette fonction permet de retourner tout les coups jouables selon une couleur.
+     * @param color La couleur
+     * @return Une liste de case, chaque case représentant un potentiel coup jouable.
+     */
     public ArrayList<Case> getPossibleMooves(CaseContent color)
     {
         ArrayList<Case> moves = new ArrayList<>();
@@ -674,8 +731,23 @@ public class Grille implements Cloneable
         return moves;
     }
     
+    /**
+     * Fonction caractérisant l'algorithme MinMax, utilisé par l'IA.
+     * Ici, il est en convention NegaMax (gain de lignes de codes, un bon codeur reste fénéant).
+     * @param g La grille sur laquel nous allons jouer
+     * @param color La couleur de celui qui doit jouer
+     * @param prof La profondeur max que l'on veut pour l'arbre
+     * @return Une tableau d'objets, la premiere case contenant le score
+     * et la deuxieme contenant la meilleure case à jouer (celle qui maximisera, 
+     * ou minimisera les gains en fonction de la couleur).
+     */
     public Object[] MinMax(Grille g, CaseContent color, int prof)
     {
+        /**
+         * On regarde tout d'abord si l'on veut descendre plus dans l'arbre,
+         * et également si la grille n'est pas fini (i.e. s'il reste 
+         * des coups jouables, ou que la grille n'est pas remplie).
+        */
         if(g.isFinished() || prof <= 0)
         {
             Object[] retour = new Object[2];
@@ -684,50 +756,62 @@ public class Grille implements Cloneable
             return retour;
         }
         
-        int scoreMax;
+        float scoreMax = Integer.MIN_VALUE;
         Case bestMoove=null;
+        ArrayList<Case> mooves = g.getPossibleMooves(color);
         
-        if(color != VueGrille.PLAYER_COLOR)//Ici on maximise, c'est le tour de l'IA
+        /**
+         * On parcours ensuite chaque coup jouable de la couleur donnée.
+         */
+        for(Case c : mooves)
         {
-            scoreMax = Integer.MIN_VALUE;
-            ArrayList<Case> mooves = g.getPossibleMooves(color);
-            for(Case c : mooves)
+            Grille tmp = g.clonage(); //On clone la grille, pour jouer un coup.
+            tmp.executeTurn(color, c.getLigne(), c.getColonne()); //On joue le coup.
+            Object[] score;
+            if(Grille.PLAYER_COLOR == color) //Si la couleur actuelle est celle du joueur
             {
-                Grille tmp = g.clonage();
-                tmp.executeTurn(color, c.getLigne(), c.getColonne());
-                Object[] score = MinMax(tmp, VueGrille.PLAYER_COLOR, prof-1);
-                if((int)score[0] > scoreMax)
-                {
-                    scoreMax = (int)score[0];
-                    bestMoove = c;
-                }
+                score = MinMax(tmp, Grille.IA_COLOR, prof-1);//On rapelle la fonction avec la couleur de l'IA
+            }
+            else
+            {
+                score = MinMax(tmp, Grille.PLAYER_COLOR, prof-1);//On rapelle la fonction avec la couleur du joueur
+            }
+            float val = (-1) * (float)score[0];//Convention NegaMax, on multiplie donc par -1 le score obtenu.
+            /**
+             * Si le score est meilleur que le scoreMax actuel, on change le meilleur coup.
+             */
+            if(val > scoreMax)
+            {
+                scoreMax = val;
+                bestMoove = c;
             }
         }
-        else //Ici on minimise, c'est le tour du joueur
-        {
-            scoreMax = Integer.MAX_VALUE;
-            ArrayList<Case> mooves = g.getPossibleMooves(color);
-            for(Case c : mooves)
-            {
-                Grille tmp = g.clonage();
-                tmp.executeTurn(color, c.getLigne(), c.getColonne());
-                Object[] score = MinMax(tmp, color, prof-1);
-                if((int)score[0] < scoreMax)
-                {
-                    scoreMax = (int)score[0];
-                    bestMoove = c;
-                }
-            }
-        }
-        
+        //On retourne.
         Object[] retour = new Object[2];
         retour[0] = scoreMax;
         retour[1] = bestMoove;
         return retour;
     }
     
-    public Object[] AlphaBeta(Grille g, CaseContent color, int prof, int alpha, int beta)
+    /**
+     * Fonction caractérisant l'algorithme Alpha-Beta utilisé par l'IA.
+     * Ici, il est en convention NegaMax (pour la même raison que MinMax).
+     * @param g La grille sur laquel nous allons jouer
+     * @param color La couleur de celui qui doit jouer
+     * @param prof La profondeur max que l'on veut pour l'arbre
+     * @param alpha Variable de minimisation des couts de l'adversaire
+     * @param beta Variable de maximisation des couts de l'IA
+     * @return Une tableau d'objets, la premiere case contenant le score
+     * et la deuxieme contenant la meilleure case à jouer (celle qui maximisera, 
+     * ou minimisera les gains en fonction de la couleur).
+     */
+    public Object[] AlphaBeta(Grille g, CaseContent color, int prof, float alpha, float beta)
     {
+        /**
+         * On regarde tout d'abord si l'on veut descendre plus dans l'arbre,
+         * et également si la grille n'est pas fini (i.e. s'il reste 
+         * des coups jouables, ou que la grille n'est pas remplie).
+        */
         if(g.isFinished() || prof <= 0)
         {
             Object[] retour = new Object[2];
@@ -738,40 +822,50 @@ public class Grille implements Cloneable
         
         Case bestMoove = null;
         ArrayList<Case> mooves = g.getPossibleMooves(color);
-        int meilleur_score = Integer.MIN_VALUE;
+        float meilleur_score = Integer.MIN_VALUE;
+        
+        /**
+         * Pour chaque coup
+         */
         for(Case c : mooves)
         {
-            Grille tmp = g.clonage();
-            tmp.executeTurn(color, c.getLigne(), c.getColonne());
+            Grille tmp = g.clonage(); //Clonage de la grille
+            tmp.executeTurn(color, c.getLigne(), c.getColonne());//On joue le coup
             Object[] score;
-            if(color == VueGrille.PLAYER_COLOR)
+            //Si le noeud actuel est l'IA ou le joueur, inverser.
+            if(color == Grille.PLAYER_COLOR)
             {
-                score = AlphaBeta(tmp, VueGrille.IA_COLOR, prof-1, -beta, -alpha);
+                score = AlphaBeta(tmp, Grille.IA_COLOR, prof-1, -beta, -alpha);
             }
             else
             {
-                score = AlphaBeta(tmp, VueGrille.PLAYER_COLOR, prof-1, -beta, -alpha);
+                score = AlphaBeta(tmp, Grille.PLAYER_COLOR, prof-1, -beta, -alpha);
             }
-            int val = -1* (int)score[0];
+            
+            float val = -1* (float)score[0];//Convention NegaMax
+            
             if(val >= meilleur_score)
             {
+                //On met a jour si le score calculé est meilleur que celui enregistré
                 meilleur_score = val;
+                //S'il est encore mieux qu'alpha
                 if(meilleur_score > alpha)
                 {
+                    //On met alpha a jour
                     alpha = meilleur_score;
                     bestMoove = c;
                     if(alpha >= beta)
                     {
-                        Object[] retour = new Object[2];
-                        retour[0] = meilleur_score;
-                        retour[1] = c;
+                        //Si alpha est supérieur a Beta, on arrête.
+                        break;
                     }
                 }
             }
         }
         
+        //On retourne
         Object[] retour = new Object[2];
-        retour[0] = meilleur_score;
+        retour[0] = alpha;
         retour[1] = bestMoove;
         return retour;
     }
@@ -812,25 +906,33 @@ public class Grille implements Cloneable
         return g;
     }
 
+    /**
+     * Fonction permettant a l'IA de jouer, en fonction des paramètres donnés.
+     */
     public void IA_Turn()
     {
         Case tmp = null;
         if(this.algoIA == 0)
         {
-            tmp = (Case) this.MinMax(this, VueGrille.IA_COLOR, this.profondeur)[1];
+            tmp = (Case) this.MinMax(this, Grille.IA_COLOR, this.profondeur)[1];
             
         }
         else
         {
-            tmp = (Case) this.AlphaBeta(this, VueGrille.IA_COLOR, this.profondeur, Integer.MIN_VALUE, Integer.MAX_VALUE)[1];
+            tmp = (Case) this.AlphaBeta(this, Grille.IA_COLOR, this.profondeur, Integer.MIN_VALUE, Integer.MAX_VALUE)[1];
         }
         if(tmp!=null)
         {            
-            this.executeTurn(VueGrille.IA_COLOR, tmp.getLigne(), tmp.getColonne());
+            this.executeTurn(Grille.IA_COLOR, tmp.getLigne(), tmp.getColonne());
         }
-        VueGrille.NEXT_TURN = VueGrille.PLAYER_COLOR;
+        Grille.NEXT_TURN = Grille.PLAYER_COLOR;
     }
     
+    /**
+     * Permet de savoir si un joueur peut jouer
+     * @param color La couleur du joueur
+     * @return Vrai s'il peut jouer, Faux sinon
+     */
     public boolean canPlay(CaseContent color)
     {
         if(this.getPossibleMooves(color).isEmpty())
@@ -838,5 +940,43 @@ public class Grille implements Cloneable
             return false;
         }
         return true;
+    }
+    
+    /**
+     * Retourne le nombre de cases qui sont occupées.
+     * @return Un int, contenant le nombre de cases occupées.
+     */
+    public int getNbBusyCase()
+    {
+        int nb=0;
+        for(int i=0; i<HEIGHT_GRID; i++)
+        {
+            for(int j=0; j< WIDTH_GRID; j++)
+            {
+                if(this.grille[i][j].getVal() != CaseContent.VIDE)
+                    nb++;
+            }
+        }
+        return nb;
+    }
+
+    /**
+     * Permet de compter le nombre de pieces d'une couleur.
+     * @param caseContent La couleur
+     * @return Le nombre de pièces de la couleur passé en paramètre présentes sur le palteau.
+     */
+    public int countPieces(CaseContent caseContent)
+    {
+        int nb = 0;
+        
+        for(int i=0; i<HEIGHT_GRID; i++)
+        {
+            for(int j=0; j< WIDTH_GRID; j++)
+            {
+                if(this.grille[i][j].getVal() == caseContent)
+                    nb++;
+            }
+        }
+        return nb;
     }
 }
