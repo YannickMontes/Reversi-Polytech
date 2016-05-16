@@ -67,22 +67,22 @@ public class MainWindow extends JFrame
      */
     private void initGraph()
     {
-        this.setSize(1102, 802);
-        this.setMinimumSize(new Dimension(1102,802));
-        this.setMaximumSize(new Dimension(1102,802));
+        this.setSize(700, 401);
+        this.setMinimumSize(new Dimension(700,401));
+        this.setMaximumSize(new Dimension(700,401));
         
         this.principalPane = new JPanel();
         this.principalPane.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         
         this.gamePanel = new JPanel();
-        this.gamePanel.setSize(801,801);
+        this.gamePanel.setSize(401,401);
         c.gridx = 0;
         c.gridy = 0;
         this.principalPane.add(this.gamePanel, c);
 
         this.optionsPane = new VueOption(this);
-        this.optionsPane.setSize(301,801);
+        this.optionsPane.setSize(300,400);
         c.gridx = 1;
         this.principalPane.add(this.optionsPane,c);
         

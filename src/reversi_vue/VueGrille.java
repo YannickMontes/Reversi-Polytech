@@ -67,14 +67,14 @@ public class VueGrille extends JComponent implements MouseMotionListener, MouseL
         g2.setStroke(new BasicStroke(1));
         
         g2.setColor(Color.LIGHT_GRAY);
-        g2.fillRect(0, 0, 801,801);
+        g2.fillRect(0, 0, 401,401);
         
         g2.setColor(Color.BLACK);
         
         for(int i=0; i<Grille.HEIGHT_GRID+1; i++)
         {
-            g2.drawLine(i*(800/Grille.HEIGHT_GRID), 0, i*(800/Grille.HEIGHT_GRID), 800);
-            g2.drawLine(0,i*(800/Grille.HEIGHT_GRID),800, i*(800/Grille.HEIGHT_GRID));
+            g2.drawLine(i*(400/Grille.HEIGHT_GRID), 0, i*(400/Grille.HEIGHT_GRID), 400);
+            g2.drawLine(0,i*(400/Grille.HEIGHT_GRID),400, i*(400/Grille.HEIGHT_GRID));
         }
         
         for(int i=0; i<Grille.HEIGHT_GRID; i++)
@@ -83,17 +83,17 @@ public class VueGrille extends JComponent implements MouseMotionListener, MouseL
             {
                 if(this.parent.getGrille().getCase(i, j).getVal()!=CaseContent.VIDE && this.parent.getGrille().getCase(i,j)!=focused)
                 {
-                    g2.drawImage(this.parent.getGrille().getCase(i, j).getImage(), j*100, i*100, this);
+                    g2.drawImage(this.parent.getGrille().getCase(i, j).getImage(), j*50, i*50, this);
                 }
                 else if(this.parent.getGrille().getCase(i, j) == focused)
                 {
                     if(Grille.NEXT_TURN == CaseContent.NOIR)
                     {
-                        g2.drawImage(Case.pionNoirFocus, j*100, i*100, this);
+                        g2.drawImage(Case.pionNoirFocus, j*50, i*50, this);
                     }
                     else
                     {
-                        g2.drawImage(Case.pionBlancFocus, j*100, i*100, this);
+                        g2.drawImage(Case.pionBlancFocus, j*50, i*50, this);
                     }
                 }
             }
@@ -103,7 +103,7 @@ public class VueGrille extends JComponent implements MouseMotionListener, MouseL
     @Override
     public Dimension getPreferredSize()
     {
-        return new Dimension(801,801);
+        return new Dimension(401,401);
     }                 
 
     @Override
@@ -121,11 +121,11 @@ public class VueGrille extends JComponent implements MouseMotionListener, MouseL
     {
         if(Grille.NEXT_TURN == Grille.PLAYER_COLOR)
         {
-            int i = e.getY()/100;
-            int j = e.getX()/100;
+            int i = e.getY()/50;
+            int j = e.getX()/50;
             if((i>=0 && i<Grille.HEIGHT_GRID && j>=0 && j<Grille.WIDTH_GRID) && this.parent.getGrille().getCase(i, j).getVal()==CaseContent.VIDE)
             {
-                if(this.parent.getGrille().isPlayable(e.getY()/100, e.getX()/100, Grille.NEXT_TURN))
+                if(this.parent.getGrille().isPlayable(e.getY()/50, e.getX()/50, Grille.NEXT_TURN))
                 {
                     focused = this.parent.getGrille().getCase(i, j);
                 }
@@ -167,9 +167,9 @@ public class VueGrille extends JComponent implements MouseMotionListener, MouseL
     {
         if(Grille.NEXT_TURN == Grille.PLAYER_COLOR)
         {
-            if(this.parent.getGrille().isPlayable(e.getY()/100, e.getX()/100, Grille.NEXT_TURN))
+            if(this.parent.getGrille().isPlayable(e.getY()/50, e.getX()/50, Grille.NEXT_TURN))
             {
-                this.parent.getGrille().executeTurn(Grille.NEXT_TURN,e.getY()/100, e.getX()/100);
+                this.parent.getGrille().executeTurn(Grille.NEXT_TURN,e.getY()/50, e.getX()/50);
                 if(Grille.NEXT_TURN == CaseContent.BLANC)
                 {
                     Grille.NEXT_TURN = CaseContent.NOIR;

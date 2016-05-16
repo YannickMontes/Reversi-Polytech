@@ -39,7 +39,7 @@ public class VueOption extends JPanel implements ActionListener
     
     public VueOption(MainWindow mw)
     {
-        this.setSize(300,801);
+        this.setSize(300,401);
         this.parent = mw;
         
         this.setLayout(new GridBagLayout());
