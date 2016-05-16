@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package reversi_vue;
 
 import java.awt.BasicStroke;
@@ -13,45 +8,58 @@ import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import reversi_modele.Case;
 import reversi_modele.CaseContent;
 import reversi_modele.Grille;
 
 /**
- *
+ * Classe contenant le composant grille du jeu. Permet de représenter le plateau
+ * de jeu.
  * @author yannick
  */
 public class VueGrille extends JComponent implements MouseMotionListener, MouseListener
 {
-    private Grille grille;
-    public static CaseContent NEXT_TURN;
-    public static CaseContent PLAYER_COLOR;
-    public static CaseContent IA_COLOR;
+    /**
+     * Attribut permettant de savoir quelle case le joueur visualise lorsqu'il cherche
+     * ou jouer.
+     */
     private Case focused;
+    /**
+     * Fênetre parente.
+     */
+    private MainWindow parent;
 
-    public VueGrille(Grille g, CaseContent playercolor)
+    /**
+     * Constructeur de la classe
+     * @param g La grille (modele)
+     * @param playercolor La couleur choisie par le joueur
+     * @param mw Le parent
+     */
+    public VueGrille(Grille g, CaseContent playercolor, MainWindow mw)
     {
         super();
-        VueGrille.PLAYER_COLOR = playercolor;
-        if(VueGrille.PLAYER_COLOR == CaseContent.NOIR)
+        this.parent = mw;
+        Grille.PLAYER_COLOR = playercolor;
+        if(Grille.PLAYER_COLOR == CaseContent.NOIR)
         {
-            VueGrille.IA_COLOR = CaseContent.BLANC;
+            Grille.IA_COLOR = CaseContent.BLANC;
         }
         else
         {
-            VueGrille.IA_COLOR = CaseContent.NOIR;
+            Grille.IA_COLOR = CaseContent.NOIR;
         }
         focused = null;
-        this.NEXT_TURN = CaseContent.NOIR;
+        Grille.NEXT_TURN = CaseContent.NOIR;
         this.addMouseMotionListener(this);
         this.addMouseListener(this);
-        this.grille = g;
     }                   
 
+    /**
+     * Fonction de dessin surchargée
+     * @param g Le pinceau
+     */
     @Override
     protected void paintComponent(Graphics g)
     {
@@ -73,13 +81,13 @@ public class VueGrille extends JComponent implements MouseMotionListener, MouseL
         {
             for(int j=0; j<Grille.WIDTH_GRID; j++)
             {
-                if(this.grille.getCase(i, j).getVal()!=CaseContent.VIDE && this.grille.getCase(i,j)!=focused)
+                if(this.parent.getGrille().getCase(i, j).getVal()!=CaseContent.VIDE && this.parent.getGrille().getCase(i,j)!=focused)
                 {
-                    g2.drawImage(this.grille.getCase(i, j).getImage(), j*100, i*100, this);
+                    g2.drawImage(this.parent.getGrille().getCase(i, j).getImage(), j*100, i*100, this);
                 }
-                else if(this.grille.getCase(i, j) == focused)
+                else if(this.parent.getGrille().getCase(i, j) == focused)
                 {
-                    if(NEXT_TURN == CaseContent.NOIR)
+                    if(Grille.NEXT_TURN == CaseContent.NOIR)
                     {
                         g2.drawImage(Case.pionNoirFocus, j*100, i*100, this);
                     }
@@ -103,18 +111,23 @@ public class VueGrille extends JComponent implements MouseMotionListener, MouseL
     {
     }
 
+    /**
+     * Lorsque l'on bouge la souris
+     * Permet de mettre a jour la variable focused
+     * @param e 
+     */
     @Override
     public void mouseMoved(MouseEvent e)
     {
-        if(VueGrille.NEXT_TURN == VueGrille.PLAYER_COLOR)
+        if(Grille.NEXT_TURN == Grille.PLAYER_COLOR)
         {
             int i = e.getY()/100;
             int j = e.getX()/100;
-            if((i>=0 && i<Grille.HEIGHT_GRID && j>=0 && j<Grille.WIDTH_GRID) && this.grille.getCase(i, j).getVal()==CaseContent.VIDE)
+            if((i>=0 && i<Grille.HEIGHT_GRID && j>=0 && j<Grille.WIDTH_GRID) && this.parent.getGrille().getCase(i, j).getVal()==CaseContent.VIDE)
             {
-                if(this.grille.isPlayable(e.getY()/100, e.getX()/100, NEXT_TURN))
+                if(this.parent.getGrille().isPlayable(e.getY()/100, e.getX()/100, Grille.NEXT_TURN))
                 {
-                    focused = this.grille.getCase(i, j);
+                    focused = this.parent.getGrille().getCase(i, j);
                 }
                 else
                 {
@@ -129,7 +142,7 @@ public class VueGrille extends JComponent implements MouseMotionListener, MouseL
         else
         {
             focused = null;
-            this.grille.IA_Turn();
+            this.parent.getGrille().IA_Turn();
         }
         this.repaint();
         this.checkConditions();
@@ -145,26 +158,29 @@ public class VueGrille extends JComponent implements MouseMotionListener, MouseL
     {
     }
 
+    /**
+     * Lorsqu'on relache le clic
+     * @param e 
+     */
     @Override
     public void mouseReleased(MouseEvent e)
     {
-        if(NEXT_TURN == PLAYER_COLOR)
+        if(Grille.NEXT_TURN == Grille.PLAYER_COLOR)
         {
-            if(this.grille.isPlayable(e.getY()/100, e.getX()/100, NEXT_TURN))
+            if(this.parent.getGrille().isPlayable(e.getY()/100, e.getX()/100, Grille.NEXT_TURN))
             {
-                this.grille.executeTurn(NEXT_TURN,e.getY()/100, e.getX()/100);
-                if(NEXT_TURN == CaseContent.BLANC)
+                this.parent.getGrille().executeTurn(Grille.NEXT_TURN,e.getY()/100, e.getX()/100);
+                if(Grille.NEXT_TURN == CaseContent.BLANC)
                 {
-                    NEXT_TURN = CaseContent.NOIR;
+                    Grille.NEXT_TURN = CaseContent.NOIR;
                 }
                 else
                 {
-                    NEXT_TURN = CaseContent.BLANC;
+                    Grille.NEXT_TURN = CaseContent.BLANC;
                 }
                 this.repaint();
             }   
         }
-        this.checkConditions();
     }
 
     @Override
@@ -177,29 +193,88 @@ public class VueGrille extends JComponent implements MouseMotionListener, MouseL
     {
     }
 
+    /**
+     * Fonction permettant d'afficher la fênetre de fin.
+     */
     private void showEndWindow()
     {
-        JDialog endWindow = new JDialog();
-        endWindow.setTitle("Fin de la partie");
-        endWindow.setModal(true);
-        endWindow.show();
+        int scoreNoir = this.parent.getGrille().countPieces(CaseContent.NOIR);
+        int scoreBlanc = this.parent.getGrille().countPieces(CaseContent.BLANC);
+        String message, score;
+        if(!this.parent.getGrille().isFinished())
+        {
+            message = "Aucune possibilité de jeu, fin de la partie!";
+        }
+        else
+        {
+            message = "Grille remplie, fin de la partie!";
+        }
+        if(scoreNoir > scoreBlanc)
+        {
+            if(Grille.PLAYER_COLOR == CaseContent.NOIR)
+            {
+                score = "\nBravo, vous avez gagné!\nScore:\nBlanc: "+scoreBlanc+", Noir: "+scoreNoir;
+            }
+            else
+            {
+                score = "\nDommage, vous avez perdu!\nScore:\nBlanc: "+scoreBlanc+", Noir: "+scoreNoir;
+            }
+        }
+        else if (scoreNoir < scoreBlanc)
+        {
+            if(Grille.PLAYER_COLOR == CaseContent.BLANC)
+            {
+                score = "\nBravo, vous avez gagné!\nScore:\nBlanc: "+scoreBlanc+", Noir: "+scoreNoir;
+            }
+            else
+            {
+                score = "\nDommage, vous avez perdu!\nScore:\nBlanc: "+scoreBlanc+", Noir: "+scoreNoir;
+            }
+        }
+        else
+        {
+            score = "\nMatch nul!\nScore:\nBlanc: "+scoreBlanc+", Noir: "+scoreNoir;
+        }
+        
+        
+        Object[] options = {"Oui",
+                    "Non"};
+        int resultat = JOptionPane.showOptionDialog(this,
+            message + score + "\nSouhaitez-vous rejouer?",
+            "Fin de la partie",
+            JOptionPane.YES_NO_CANCEL_OPTION,
+            JOptionPane.INFORMATION_MESSAGE,
+            null,
+            options,
+            options[1]);
+        if(resultat == JOptionPane.YES_OPTION)
+        {
+            this.parent.replay();
+        }
+        else
+        {
+            System.exit(0);
+        }
     }
     
+    /**
+     * Fonction vérifiant s'il faut afficher la fêntre de fin ou non.
+     */
     private void checkConditions()
     {
-        if(this.grille.isFinished())
+        if(this.parent.getGrille().isFinished())
         {
             this.showEndWindow();
         }
         else
         {
-            if(!this.grille.canPlay(NEXT_TURN))
+            if(!this.parent.getGrille().canPlay(Grille.NEXT_TURN))
             {
-                if(NEXT_TURN == PLAYER_COLOR)
+                if(Grille.NEXT_TURN == Grille.PLAYER_COLOR)
                 {
-                    if(this.grille.canPlay(IA_COLOR))
+                    if(this.parent.getGrille().canPlay(Grille.IA_COLOR))
                     {
-                        NEXT_TURN = IA_COLOR;
+                        Grille.NEXT_TURN = Grille.IA_COLOR;
                     }
                     else
                     {
@@ -208,9 +283,9 @@ public class VueGrille extends JComponent implements MouseMotionListener, MouseL
                 }
                 else
                 {
-                    if(this.grille.canPlay(PLAYER_COLOR))
+                    if(this.parent.getGrille().canPlay(Grille.PLAYER_COLOR))
                     {
-                        NEXT_TURN = PLAYER_COLOR;
+                        Grille.NEXT_TURN = Grille.PLAYER_COLOR;
                     }
                     else
                     {
