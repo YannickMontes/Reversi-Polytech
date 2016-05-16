@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package reversi_vue;
 
 import java.awt.Dimension;
@@ -10,57 +5,49 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import reversi_modele.Case;
 import reversi_modele.CaseContent;
 import reversi_modele.Grille;
 
 /**
- *
+ * Classe représentant la fênetre principale du jeu.
  * @author yannick
  */
 public class MainWindow extends JFrame
 {
+    /**
+     * Attribut contenant le plateau de jeu de manière modele.
+     */
     private Grille plateau;
+    /**
+     * Panneau principal ou l'on met tout les composants.
+     */
     private JPanel principalPane;
+    /**
+     * Panneau de jeu, ou l'on met la grille de jeu
+     */
     private JPanel gamePanel;
+    /**
+     * Panneau d'options
+     */
     private VueOption optionsPane;
+    /**
+     * Variable contenant le plateau de jeu, de manière vue.
+     */
     private VueGrille gridComponent;
-    private boolean inGame;
     
-    public MainWindow(String name, Grille g)
+    /**
+     * Constructeur de base
+     * @param name Nom de la fênetre
+     */
+    public MainWindow(String name)
     {
         super(name);
-        this.inGame = false;
-        this.plateau = g;
         this.init();
-        /* while(!plateau.isFinished())
-        {
-            if(VueGrille.NEXT_TURN!=VueGrille.PLAYER_COLOR)
-            {
-                long current_time = System.currentTimeMillis();
-                Case tmp = (Case)plateau.AlphaBeta(plateau, VueGrille.NEXT_TURN, 8, Integer.MIN_VALUE, Integer.MAX_VALUE)[1];
-                System.out.println("Temps d'exécution de l'algo: "+(System.currentTimeMillis()-current_time)+" millisecondes");
-                plateau.executeTurn(VueGrille.NEXT_TURN, tmp.getLigne(), tmp.getColonne());
-                gridComponent.repaint();
-                VueGrille.NEXT_TURN = VueGrille.PLAYER_COLOR;
-            }
-            /* IA CONTRE IA
-            else
-            {
-                Case tmp = (Case)plateau.AlphaBeta(plateau, VueGrille.NEXT_TURN, 4, Integer.MIN_VALUE, Integer.MAX_VALUE)[1];
-                plateau.executeTurn(VueGrille.NEXT_TURN, tmp.getLigne(), tmp.getColonne());
-                gridComponent.repaint();
-                VueGrille.NEXT_TURN = CaseContent.BLANC;
-            }
-            try
-            {
-                Thread.sleep(1);
-            } catch (InterruptedException ex)
-            {
-            }
-        }*/
     }
     
+    /**
+     * Fonction d'initialisation
+     */
     private void init()
     {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -69,6 +56,15 @@ public class MainWindow extends JFrame
         this.initGraph();
     }
     
+    //GETTER
+    public Grille getGrille()
+    {
+        return this.plateau;
+    }
+    
+    /**
+     * Initialisation graphique de la fênetre
+     */
     private void initGraph()
     {
         this.setSize(1102, 802);
@@ -95,14 +91,30 @@ public class MainWindow extends JFrame
         this.pack();
     }
     
+    /**
+     * Fonction permettant de lancer le jeu
+     * @param color La couleur du joueur
+     * @param algo L'algo choisi pour l'IA
+     * @param difficulty La difficulté choisie
+     */
     public void launchGame(CaseContent color, int algo, int difficulty)
     {
         this.gamePanel.removeAll();
         this.plateau = new Grille(true, algo, difficulty);
-        this.gridComponent = new VueGrille(this.plateau, color);
+        this.gridComponent = new VueGrille(this.plateau, color, this);
         this.gamePanel.add(this.gridComponent);
         this.pack();
-        this.inGame = true;
         this.repaint();
+    }
+
+    /**
+     * Fonction permettant de relancer une partie.
+     */
+    public void replay()
+    {
+        this.gamePanel.removeAll();
+        this.plateau = null;
+        this.gridComponent = null;
+        this.pack();
     }
 }
