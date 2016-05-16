@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package reversi_modele;
 
 import java.awt.image.BufferedImage;
@@ -12,20 +7,39 @@ import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 
 /**
- *
+ * Cette classe permet de gérer le contenu d'une case de la grille.
  * @author yannick
  */
 public class Case
 {
+    /**
+     * Ces variables statiques servent a stocker les images de chaque pions.
+     * Elles sont initialisées qu'une seule fois.
+     */
     public static BufferedImage pionNoir;
     public static BufferedImage pionBlanc;
     public static BufferedImage pionNoirFocus;
     public static BufferedImage pionBlancFocus;
+    
+    /**
+     * Cet attribut représente la ligne sur le plateau ou est situé le pion
+     */
     private int ligne;
+    /**
+     * Cet attribut représente la colonne sur le plateau ou est situé le pion
+     */
     private int colonne;
+    /**
+     * Cet attribute contient la couleur du pion.
+     */
     private CaseContent val;
     
-    
+    /**
+     * Constructeur de base, selon une ligne est une colonne. Initialise la
+     * couleur à VIDE.
+     * @param ligne Ligne de la case
+     * @param colonne Colonne de la case
+     */
     public Case(int ligne, int colonne)
     {
         this.ligne = ligne;
@@ -33,6 +47,13 @@ public class Case
         this.val = CaseContent.VIDE;
     }
     
+    /**
+     * Constructeur de base, selon une ligne est une colonne. Initialise la
+     * couleur à val.
+     * @param ligne Ligne de la case
+     * @param colonne Colonne de la case
+     * @param val Couleur de la case
+     */
     public Case(int ligne, int colonne, CaseContent val)
     {
         this.ligne = ligne;
@@ -40,14 +61,17 @@ public class Case
         this.val = val;
     }
     
-    public void initImages()
+    /**
+     * Permet d'initaliser les variables contenant les images.
+     */
+    public static void initImages()
     {
         try
         {
-            Case.pionBlanc = ImageIO.read(getClass().getResource("/reversi_images/0.png"));
-            Case.pionNoir = ImageIO.read(getClass().getResource("/reversi_images/1.png"));
-            Case.pionBlancFocus = ImageIO.read(getClass().getResource("/reversi_images/focus_blanc.png"));
-            Case.pionNoirFocus = ImageIO.read(getClass().getResource("/reversi_images/focus_noir.png"));
+            Case.pionBlanc = ImageIO.read(Case.class.getResource("/reversi_images/0.png"));
+            Case.pionNoir = ImageIO.read(Case.class.getResource("/reversi_images/1.png"));
+            Case.pionBlancFocus = ImageIO.read(Case.class.getResource("/reversi_images/focus_blanc.png"));
+            Case.pionNoirFocus = ImageIO.read(Case.class.getResource("/reversi_images/focus_noir.png"));
             
         } catch (IOException ex)
         {
@@ -55,6 +79,7 @@ public class Case
         }
     }
 
+    //GETTERS & SETTERS
     public int getLigne()
     {
         return ligne;
@@ -90,6 +115,10 @@ public class Case
         return null;
     }
 
+    /**
+     * Fonction toString surchargée
+     * @return La valeur de la case dans un string
+     */
     @Override
     public String toString()
     {
