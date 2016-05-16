@@ -42,6 +42,11 @@ public class Grille implements Cloneable
     private int profondeur;
     
     /**
+     * Variable servant a timer la réponse de l'IA à 3 secondes max.
+     */
+    private long timeAlgoLaunched;
+    
+    /**
      * Conctructeur par défaut de la grille, il initialise une grille basique.
      * @param generation Indique si il faut ou non générer une grille de départ basique.
      */
@@ -748,7 +753,7 @@ public class Grille implements Cloneable
          * et également si la grille n'est pas fini (i.e. s'il reste 
          * des coups jouables, ou que la grille n'est pas remplie).
         */
-        if(g.isFinished() || prof <= 0)
+        if(g.isFinished() || prof <= 0 || (System.currentTimeMillis() - this.timeAlgoLaunched > 3000))
         {
             Object[] retour = new Object[2];
             retour[0] = g.evaluation(color);
@@ -812,7 +817,7 @@ public class Grille implements Cloneable
          * et également si la grille n'est pas fini (i.e. s'il reste 
          * des coups jouables, ou que la grille n'est pas remplie).
         */
-        if(g.isFinished() || prof <= 0)
+        if(g.isFinished() || prof <= 0 || (System.currentTimeMillis() - this.timeAlgoLaunched > 3000))
         {
             Object[] retour = new Object[2];
             retour[0] = g.evaluation(color);
@@ -911,6 +916,7 @@ public class Grille implements Cloneable
      */
     public void IA_Turn()
     {
+        this.timeAlgoLaunched = System.currentTimeMillis();
         Case tmp = null;
         if(this.algoIA == 0)
         {
