@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package reversi_vue;
 
 import java.awt.Font;
@@ -154,15 +149,15 @@ public class VueOption extends JPanel implements ActionListener
             int algorithm = 0;
             if(this.facile.isSelected())
             {
-                difficulty = 2;
+                difficulty = 4;
             }
             else if(this.moyen.isSelected())
             {
-                difficulty = 4;
+                difficulty = 6;
             }
             else
             {
-                difficulty = 6;
+                difficulty = 8;
             }
             if(this.noir.isSelected())
             {
